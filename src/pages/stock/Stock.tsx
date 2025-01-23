@@ -24,6 +24,8 @@ import {
 	DialogActions,
 	FormControlLabel,
 	DialogContentText,
+	useTheme,
+	useMediaQuery,
 } from "@mui/material";
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
@@ -44,6 +46,9 @@ const validitySchema = yup.object().shape({
 
 
 export const Stock: React.FC = () => {
+	const theme = useTheme();
+	const smDown = useMediaQuery(theme.breakpoints.down('sm'));
+
 	const [searchParams, setSearchParams] = useSearchParams();
 	const { debounce } = useDebounce();
 
@@ -264,8 +269,8 @@ export const Stock: React.FC = () => {
 				sx={{ backgroundColor: "#fff", px: 3, py: 1, mr: 5, mb: 1 }}
 				variant="elevation"
 			>
-				<Box display={'flex'} justifyContent={'space-between'}>
-					<Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} gap={10}>
+				<Box display={'flex'} justifyContent={'space-between'} flexDirection={smDown ? 'column' : 'row'}>
+					<Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} gap={smDown ? 2 : 10} flexDirection={smDown ? 'column' : 'row'} mb={smDown ? 2 : undefined}>
 						<TextField
 							size="small"
 							placeholder={'Pesquisar'}
@@ -297,7 +302,7 @@ export const Stock: React.FC = () => {
 					<Table>
 						<TableHead>
 							<TableRow>
-								<TableCell width={200}>Código</TableCell>
+								{!smDown && <TableCell width={200}>Código</TableCell>}
 								<TableCell>Produto</TableCell>
 								<TableCell>Estoque</TableCell>
 								<TableCell>Ações</TableCell>
@@ -312,7 +317,7 @@ export const Stock: React.FC = () => {
 											key={row.code}
 											hover
 										>
-											<TableCell>{row.code}</TableCell>
+											{!smDown && <TableCell>{row.code}</TableCell>}
 											<TableCell>{row.name}</TableCell>
 											<TableCell>
 												{

@@ -15,6 +15,7 @@ import {
 	Pagination,
 	Typography,
 	TableContainer,
+	useMediaQuery,
 } from "@mui/material";
 import * as yup from 'yup';
 import Swal from "sweetalert2";
@@ -43,6 +44,7 @@ const NUMBER_OF_SKELETONS = Array(ROW_LIMIT).fill(null);
 
 export const Payments: React.FC = () => {
 	const theme = useTheme();
+	const smDown = useMediaQuery(theme.breakpoints.down('sm'));
 	const formRef = useRef<FormHandles>(null);
 
 	const [suppliers, setSuppliers] = useState<IMenuItens[]>([]);
@@ -246,12 +248,12 @@ export const Payments: React.FC = () => {
 
 	return (
 		<LayoutMain title="Boletos" subTitle="Gerencie seus boletos">
-			<Grid container spacing={2}>
-				<Grid item xs={7}>
+			<Grid container spacing={smDown ? 1 : 2}>
+				<Grid item xs={smDown ? 12 : 7}>
 					<Paper variant="elevation" sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1, width: 'auto' }}>
-						<Box display={'flex'} justifyContent={'space-between'}>
+						<Box display={'flex'} justifyContent={'space-between'} flexDirection={smDown ? 'column' : 'row'}>
 							<Typography variant="h5" sx={{ m: 2 }}>Boletos:</Typography>
-							<Box display={'flex'} gap={2} margin={2} alignItems={'center'}>
+							<Box display={'flex'} gap={smDown ? 1 : 2} margin={2} alignItems={'center'} flexDirection={smDown ? 'column' : 'row'}>
 								<CustomCheckbox
 									menuItens={
 										[
@@ -266,7 +268,7 @@ export const Payments: React.FC = () => {
 									}}
 									flexDirection='column'
 								/>
-								<Box display={'flex'} gap={2} margin={2}>
+								<Box display={'flex'} gap={2} margin={2} flexDirection={smDown ? 'column' : 'row'}>
 									<CustomSelect
 										label="Ordenar por"
 										menuItens={[{ text: 'Vencimento', value: 'expiration' }, { text: 'Data', value: 'created_at' }]}
@@ -289,8 +291,8 @@ export const Payments: React.FC = () => {
 								<Table>
 									<TableHead>
 										<TableRow>
-											<TableCell>Data</TableCell>
-											<TableCell>Fornecedor</TableCell>
+											{!smDown && <TableCell>Data</TableCell>}
+											{!smDown && <TableCell>Fornecedor</TableCell>}
 											<TableCell>Valor</TableCell>
 											<TableCell>Vencimento</TableCell>
 											<TableCell>Ações</TableCell>
@@ -310,16 +312,20 @@ export const Payments: React.FC = () => {
 																{ backgroundColor: '#38f75522' }
 															}
 														>
-															<TableCell>
-																<Typography>
-																	{format(row.created_at, 'dd/MM')}
-																</Typography>
-															</TableCell>
-															<TableCell>
-																<Typography>
-																	{row.name}
-																</Typography>
-															</TableCell>
+															{!smDown &&
+																<TableCell>
+																	<Typography>
+																		{format(row.created_at, 'dd/MM')}
+																	</Typography>
+																</TableCell>
+															}
+															{!smDown &&
+																<TableCell>
+																	<Typography>
+																		{row.name}
+																	</Typography>
+																</TableCell>
+															}
 															<TableCell>
 																<Typography>
 																	{nToBRL(row.value)}
@@ -427,43 +433,45 @@ export const Payments: React.FC = () => {
 						)}
 					</Paper>
 				</Grid>
-				<Grid item xs={5}>
-					<Paper variant="elevation" sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1, width: 'auto' }}>
-						<Typography variant="h5" sx={{ m: 2 }}>Novo Boleto:</Typography>
-						{(fetchError && <Alert severity="error">Já existe um boleto com este código !</Alert>)}
-						<VForm ref={formRef} onSubmit={handleSubmit} placeholder={''}>
-							<Box display={'flex'} flexDirection={'column'} gap={3} margin={3}>
-								<Box display={'flex'} gap={5}>
-									<Box width={300}>
-										<VSelect
-											name="supplier_id"
-											label="Fornecedor"
-											menuItens={suppliers.length > 0 ? suppliers : [{ text: "Nenhum fornecedor cadastrado", value: "" }]}
-											messageError="Fornecedor não pode ser vazio"
-										/>
+				{!smDown &&
+					<Grid item xs={5}>
+						<Paper variant="elevation" sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1, width: 'auto' }}>
+							<Typography variant="h5" sx={{ m: 2 }}>Novo Boleto:</Typography>
+							{(fetchError && <Alert severity="error">Já existe um boleto com este código !</Alert>)}
+							<VForm ref={formRef} onSubmit={handleSubmit} placeholder={''}>
+								<Box display={'flex'} flexDirection={'column'} gap={3} margin={3}>
+									<Box display={'flex'} gap={5}>
+										<Box width={300}>
+											<VSelect
+												name="supplier_id"
+												label="Fornecedor"
+												menuItens={suppliers.length > 0 ? suppliers : [{ text: "Nenhum fornecedor cadastrado", value: "" }]}
+												messageError="Fornecedor não pode ser vazio"
+											/>
+										</Box>
 									</Box>
+									<VTextField name="code" label="Código" autoComplete="off" onKeyDown={() => setFetchError(false)} />
+									<VTextField
+										name="desc"
+										rows={4}
+										fullWidth
+										multiline
+										label="Descrição"
+										id="elevation-multiline-static"
+										autoComplete="off"
+									/>
+									<Button
+										variant="contained"
+										onClick={() => formRef.current?.submitForm()}
+										disabled={loadingSubmit}
+									>
+										Confirmar
+									</Button>
 								</Box>
-								<VTextField name="code" label="Código" autoComplete="off" onKeyDown={() => setFetchError(false)} />
-								<VTextField
-									name="desc"
-									rows={4}
-									fullWidth
-									multiline
-									label="Descrição"
-									id="elevation-multiline-static"
-									autoComplete="off"
-								/>
-								<Button
-									variant="contained"
-									onClick={() => formRef.current?.submitForm()}
-									disabled={loadingSubmit}
-								>
-									Confirmar
-								</Button>
-							</Box>
-						</VForm>
-					</Paper>
-				</Grid>
+							</VForm>
+						</Paper>
+					</Grid>
+				}
 			</Grid>
 		</LayoutMain >
 	);
