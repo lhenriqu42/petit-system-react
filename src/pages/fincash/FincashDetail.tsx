@@ -11,6 +11,8 @@ import {
 	TableBody,
 	Typography,
 	Pagination,
+	useTheme,
+	useMediaQuery,
 } from "@mui/material";
 import * as yup from 'yup';
 import Swal from 'sweetalert2';
@@ -34,6 +36,9 @@ import { FincashService, ICashOutflow, IFincash, OutflowService } from "../../sh
 const OUTFLOW_ROW_LIMIT = 5;
 
 export const FincashDetail: React.FC = () => {
+	const theme = useTheme()
+	const smdown = useMediaQuery(theme.breakpoints.down('sm'));
+
 	const { id } = useParams();
 	const [desc, setDesc] = useState('');
 
@@ -231,7 +236,7 @@ export const FincashDetail: React.FC = () => {
 				</Box>
 			</Paper>
 			<Paper sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1 }}>
-				<Box margin={5} display={'flex'} justifyContent={'space-between'}>
+				<Box margin={smdown ? 2 : 5} display={'flex'} justifyContent={'space-between'} flexDirection={smdown ? 'column' : 'row'}>
 					<Box>
 						<Typography variant="h4" margin={1}>
 							{fincash?.created_at ? `${formatDateWithCustomDay(fincash.created_at, 'dd/MM/yy')}` : <Skeleton sx={{ maxWidth: 200 }} />}
@@ -247,7 +252,7 @@ export const FincashDetail: React.FC = () => {
 
 							<Box display={'flex'}>
 								<Typography variant="h5" mx={1}>
-									Vendas em Dinheiro:
+									{smdown ? 'Dinheiro:' : 'Vendas em Dinheiro:'}
 								</Typography>
 								<Typography variant="h5" color={
 									fincash?.finalValue &&
@@ -312,16 +317,16 @@ export const FincashDetail: React.FC = () => {
 						</Box>
 					</Box>
 					<Box>
-						<Box border={1} minHeight={210} minWidth={300} my={2} sx={{ backgroundColor: '#eee' }} display={'flex'} alignItems={'center'} flexDirection={'column'} px={1}>
+						<Box border={1} minHeight={210} minWidth={smdown ? 250 : 300} my={2} sx={{ backgroundColor: '#eee' }} display={'flex'} alignItems={'center'} flexDirection={'column'} px={1}>
 							<Typography variant="h5" margin={1}>
 								Dinheiro
 							</Typography>
 							<Box minWidth={400}>
 								<Box display={'flex'}>
-									<Typography variant="h5" margin={1}>
+									<Typography variant="h5" margin={1} ml={smdown ? 10 : undefined}>
 										Início: {fincash?.value ? nToBRL(fincash.value) : 'R$ 0,00'}
 									</Typography>
-									<Typography variant='body2' fontSize={18} color={fincash?.diferenceLastFincash && fincash?.diferenceLastFincash < 0 ? '#ef0000' : '#00e000'}>
+									<Typography ml={smdown ? 10 : undefined} variant='body2' fontSize={18} color={fincash?.diferenceLastFincash && fincash?.diferenceLastFincash < 0 ? '#ef0000' : '#00e000'}>
 										{fincash?.diferenceLastFincash && fincash?.diferenceLastFincash > 0 && '+'}{fincash?.diferenceLastFincash && fincash?.diferenceLastFincash}
 									</Typography>
 								</Box>
@@ -329,7 +334,7 @@ export const FincashDetail: React.FC = () => {
 									{
 										fincash?.isFinished &&
 										<>
-											<Typography variant="h5" mx={1}>
+											<Typography variant="h5" mx={1} ml={smdown ? 10 : undefined}>
 												Variação:
 											</Typography>
 											<Typography variant="h5" color={fincash?.finalValue && (fincash.finalValue - fincash.value) < 0 ? '#ef0000' : '#00e000'}>
@@ -341,7 +346,7 @@ export const FincashDetail: React.FC = () => {
 								{
 									fincash?.isFinished &&
 									<>
-										<Typography variant="h5" margin={1}>
+										<Typography variant="h5" margin={1} ml={smdown ? 10 : undefined}>
 											Fim: {fincash?.finalValue ? nToBRL(fincash.finalValue) : 'R$ 0,00'}
 										</Typography>
 										{
@@ -351,7 +356,8 @@ export const FincashDetail: React.FC = () => {
 												((fincash.finalValue - fincash.value) + outflows.total) < 0 ?
 												<Box
 													m={2}
-													ml={1}
+													ml={smdown ? 5 : 1}
+													maxWidth={smdown ? 300 : undefined}
 													p={1}
 													border={1}
 													sx={{ backgroundColor: '#e00000' }}
@@ -371,9 +377,10 @@ export const FincashDetail: React.FC = () => {
 												((fincash.finalValue - fincash.value) + outflows.total) - fincash.totalValue > 0 ?
 												<Box
 													m={2}
-													ml={1}
 													p={1}
 													border={1}
+													ml={smdown ? 5 : 1}
+													maxWidth={smdown ? 300 : undefined}
 													sx={{ backgroundColor: '#e0a000' }}
 												>
 													<Typography variant="h5" color={'#fff'}>
@@ -387,7 +394,7 @@ export const FincashDetail: React.FC = () => {
 								}
 							</Box>
 						</Box>
-						<Box border={1} minHeight={210} minWidth={300} my={2} sx={{ backgroundColor: '#eee' }} display={'flex'} alignItems={'center'} flexDirection={'column'}>
+						<Box border={1} minHeight={210} minWidth={smdown ? 250 : 300} my={2} sx={{ backgroundColor: '#eee' }} display={'flex'} alignItems={'center'} flexDirection={'column'}>
 							<Typography variant="h5" margin={1}>
 								Cartão
 							</Typography>
@@ -422,7 +429,7 @@ export const FincashDetail: React.FC = () => {
 												</>
 												:
 												<Box>
-													<Box display={'flex'} gap={2}>
+													<Box display={'flex'} gap={smdown ? 1 : 2}>
 														<Typography variant="h5" m={1}>
 															Cartão: {nToBRL(fincash.cardValue)}
 														</Typography>
@@ -476,22 +483,24 @@ export const FincashDetail: React.FC = () => {
 							}
 						</Box>
 					</Box>
-					<Box border={1} minHeight={400} minWidth={500} my={2} sx={{ backgroundColor: '#eee' }} display={'flex'} alignItems={'center'} justifyContent={'space-between'} flexDirection={'column'} py={2}>
+					<Box border={1} minHeight={400} minWidth={smdown ? 250 : 500} my={2} sx={{ backgroundColor: '#eee' }} display={'flex'} alignItems={'center'} justifyContent={'space-between'} flexDirection={'column'} py={2}>
 						<Box display={'flex'} alignItems={'center'} flexDirection={'column'}>
-							<Typography variant="h5" margin={1}>
+							<Typography variant="h5" margin={1} >
 								Saídas
 							</Typography>
 
-							<Box minWidth={400} minHeight={200}>
+							<Box minWidth={smdown ? 200 : 400} minHeight={200}>
 								<Table>
 									<TableBody>
 										{outflows?.outflows.map((outflow) =>
 											<TableRow key={outflow.id}>
-												<TableCell>
-													<Typography variant="h5">
-														{outflow.type}
-													</Typography>
-												</TableCell>
+												{!smdown &&
+													<TableCell>
+														<Typography variant="h5">
+															{outflow.type}
+														</Typography>
+													</TableCell>
+												}
 												<TableCell>
 													<Typography variant="h5">
 														{nToBRL(outflow.value)}

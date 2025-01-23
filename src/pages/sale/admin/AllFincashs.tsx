@@ -158,17 +158,18 @@ export const AllFincashs: React.FC = () => {
 				<Paper variant="elevation" sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1, width: 'auto' }}>
 					<Box minHeight={625}>
 						<TableContainer>
-							<Table sx={{ minWidth: 650 }} aria-label="simple table">
+							<Table sx={smDown ? {} : { minWidth: 650 }} aria-label="simple table">
 								<TableHead>
 									<TableRow>
 										<TableCell>Dia</TableCell>
 										<TableCell>Nome</TableCell>
-										<TableCell>Horário</TableCell>
-										<TableCell colSpan={2}>Dinheiro do Caixa</TableCell>
-										<TableCell>Final</TableCell>
-										<TableCell>Total de Vendas</TableCell>
+										{!smDown && <TableCell>Horário</TableCell>}
+										{!smDown && <TableCell colSpan={2}>Dinheiro do Caixa</TableCell>}
+										{!smDown && <TableCell>Final</TableCell>}
+										{!smDown && <TableCell>Total de Vendas</TableCell>}
+
 										<TableCell>Ações</TableCell>
-										<TableCell>Observações</TableCell>
+										{!smDown && <TableCell>Observações</TableCell>}
 									</TableRow>
 								</TableHead>
 
@@ -187,68 +188,76 @@ export const AllFincashs: React.FC = () => {
 															{row.opener}
 														</Typography>
 													</TableCell>
-													<TableCell>
-														<Typography>
-															{`${format(row.created_at, 'HH:mm')} - ${row.finalDate ? format(row.finalDate, 'HH:mm') : 'Aberto'}`}
-														</Typography>
-													</TableCell>
-													<TableCell sx={{ backgroundColor: '#eee' }}>
-														<Typography variant='body2' fontSize={11.5} color={row.diferenceLastFincash && row.diferenceLastFincash < 0 ? '#ef0000' : '#00e000'}>
-															{row.diferenceLastFincash && row.diferenceLastFincash > 0 && '+'}{row.diferenceLastFincash && row.diferenceLastFincash}
-														</Typography>
-														<Typography>
-															{nToBRL(row.value)}
-														</Typography>
-													</TableCell>
-													<TableCell sx={{ backgroundColor: '#eee' }}>
-														<Typography color={row.finalValue && (row.finalValue - row.value) < 0 ? '#ef0000' : '#00e000'}>
-															{row.finalValue ? nToBRL(row.finalValue - row.value) : 'R$ ........'}
-														</Typography>
-													</TableCell>
-													<TableCell sx={{ backgroundColor: '#eee' }}>
-														<Typography>
-															{row.finalValue ? nToBRL(row.finalValue) : 'R$ ........'}
-														</Typography>
-													</TableCell>
-
-													<TableCell>
-														<Box display={'flex'} gap={1}>
+													{!smDown &&
+														<TableCell>
 															<Typography>
-																{nToBRL(row.totalValue)}
+																{`${format(row.created_at, 'HH:mm')} - ${row.finalDate ? format(row.finalDate, 'HH:mm') : 'Aberto'}`}
 															</Typography>
-															{!errorLoading ?
-																(
-																	erros &&
-																	erros[row.id] &&
-																	erros[row.id].includes(EFincashErrors.CardSaleError) &&
-																	<Box height={10} width={10} borderRadius={90} border={1} sx={{ backgroundColor: EErrorsColor.MediumError }} />
-																) : (
-																	<Skeleton sx={{ maxHeight: 10, maxWidth: 10, borderRadius: 90 }} />
-																)
-															}
-															{!errorLoading ?
-																(
-																	erros &&
-																	erros[row.id] &&
-																	erros[row.id].includes(EFincashErrors.CashOutError) &&
-																	<Box height={10} width={10} border={1} borderRadius={90} sx={{ backgroundColor: EErrorsColor.HighError }} />
-																) : (
-																	<Skeleton sx={{ maxHeight: 10, maxWidth: 10, borderRadius: 90 }} />
-																)
-															}
-															{!errorLoading ?
-																(
-																	erros &&
-																	erros[row.id] &&
-																	erros[row.id].includes(EFincashErrors.CashSaleError) &&
-																	<Box height={10} width={10} border={1} borderRadius={90} sx={{ backgroundColor: EErrorsColor.MediumError }} />
-																) : (
-																	<Skeleton sx={{ maxHeight: 10, maxWidth: 10, borderRadius: 90 }} />
-																)
-															}
-														</Box>
-													</TableCell>
-
+														</TableCell>
+													}
+													{!smDown &&
+														<TableCell sx={{ backgroundColor: '#eee' }}>
+															<Typography variant='body2' fontSize={11.5} color={row.diferenceLastFincash && row.diferenceLastFincash < 0 ? '#ef0000' : '#00e000'}>
+																{row.diferenceLastFincash && row.diferenceLastFincash > 0 && '+'}{row.diferenceLastFincash && row.diferenceLastFincash}
+															</Typography>
+															<Typography>
+																{nToBRL(row.value)}
+															</Typography>
+														</TableCell>
+													}
+													{!smDown &&
+														<TableCell sx={{ backgroundColor: '#eee' }}>
+															<Typography color={row.finalValue && (row.finalValue - row.value) < 0 ? '#ef0000' : '#00e000'}>
+																{row.finalValue ? nToBRL(row.finalValue - row.value) : 'R$ ........'}
+															</Typography>
+														</TableCell>
+													}
+													{!smDown &&
+														<TableCell sx={{ backgroundColor: '#eee' }}>
+															<Typography>
+																{row.finalValue ? nToBRL(row.finalValue) : 'R$ ........'}
+															</Typography>
+														</TableCell>
+													}
+													{!smDown &&
+														<TableCell>
+															<Box display={'flex'} gap={1}>
+																<Typography>
+																	{nToBRL(row.totalValue)}
+																</Typography>
+																{!errorLoading ?
+																	(
+																		erros &&
+																		erros[row.id] &&
+																		erros[row.id].includes(EFincashErrors.CardSaleError) &&
+																		<Box height={10} width={10} borderRadius={90} border={1} sx={{ backgroundColor: EErrorsColor.MediumError }} />
+																	) : (
+																		<Skeleton sx={{ maxHeight: 10, maxWidth: 10, borderRadius: 90 }} />
+																	)
+																}
+																{!errorLoading ?
+																	(
+																		erros &&
+																		erros[row.id] &&
+																		erros[row.id].includes(EFincashErrors.CashOutError) &&
+																		<Box height={10} width={10} border={1} borderRadius={90} sx={{ backgroundColor: EErrorsColor.HighError }} />
+																	) : (
+																		<Skeleton sx={{ maxHeight: 10, maxWidth: 10, borderRadius: 90 }} />
+																	)
+																}
+																{!errorLoading ?
+																	(
+																		erros &&
+																		erros[row.id] &&
+																		erros[row.id].includes(EFincashErrors.CashSaleError) &&
+																		<Box height={10} width={10} border={1} borderRadius={90} sx={{ backgroundColor: EErrorsColor.MediumError }} />
+																	) : (
+																		<Skeleton sx={{ maxHeight: 10, maxWidth: 10, borderRadius: 90 }} />
+																	)
+																}
+															</Box>
+														</TableCell>
+													}
 													<TableCell>
 														<Box display={'flex'}>
 															<Link to={'/caixa/' + row.id + '?backPage=' + page}>
@@ -270,11 +279,14 @@ export const AllFincashs: React.FC = () => {
 															}
 														</Box>
 													</TableCell>
-													<TableCell sx={{ maxWidth: 120 }}>
-														<Typography noWrap overflow="hidden" textOverflow="ellipsis" marginRight={6}>
-															{row.obs}
-														</Typography>
-													</TableCell>
+													{
+														!smDown &&
+														<TableCell sx={{ maxWidth: 120 }}>
+															<Typography noWrap overflow="hidden" textOverflow="ellipsis" marginRight={6}>
+																{row.obs}
+															</Typography>
+														</TableCell>
+													}
 												</TableRow>
 											)
 										)
@@ -287,27 +299,35 @@ export const AllFincashs: React.FC = () => {
 												<TableCell >
 													<Skeleton sx={{ minHeight: 40, maxWidth: 80 }} />
 												</TableCell>
-												<TableCell >
-													<Skeleton sx={{ minHeight: 40, maxWidth: 80 }} />
-												</TableCell>
-												<TableCell sx={{ backgroundColor: '#eee' }}>
-													<Skeleton sx={{ minHeight: 40, maxWidth: 70 }} />
-												</TableCell>
-												<TableCell sx={{ backgroundColor: '#eee' }}>
-													<Skeleton sx={{ minHeight: 40, maxWidth: 70 }} />
-												</TableCell>
-												<TableCell sx={{ backgroundColor: '#eee' }}>
-													<Skeleton sx={{ minHeight: 40, maxWidth: 70 }} />
-												</TableCell>
-												<TableCell >
-													<Skeleton sx={{ minHeight: 40, maxWidth: 60 }} />
-												</TableCell>
+												{
+													!smDown &&
+													<>
+														<TableCell >
+															<Skeleton sx={{ minHeight: 40, maxWidth: 80 }} />
+														</TableCell>
+														<TableCell sx={{ backgroundColor: '#eee' }}>
+															<Skeleton sx={{ minHeight: 40, maxWidth: 70 }} />
+														</TableCell>
+														<TableCell sx={{ backgroundColor: '#eee' }}>
+															<Skeleton sx={{ minHeight: 40, maxWidth: 70 }} />
+														</TableCell>
+														<TableCell sx={{ backgroundColor: '#eee' }}>
+															<Skeleton sx={{ minHeight: 40, maxWidth: 70 }} />
+														</TableCell>
+														<TableCell >
+															<Skeleton sx={{ minHeight: 40, maxWidth: 60 }} />
+														</TableCell>
+													</>
+												}
 												<TableCell >
 													<Fab disabled size='medium'></Fab>
 												</TableCell>
-												<TableCell >
-													<Skeleton sx={{ minHeight: 40, maxWidth: 230 }} />
-												</TableCell>
+												{
+													!smDown &&
+													<TableCell >
+														<Skeleton sx={{ minHeight: 40, maxWidth: 230 }} />
+													</TableCell>
+												}
 											</TableRow>
 										))
 									}
@@ -331,27 +351,30 @@ export const AllFincashs: React.FC = () => {
 						) :
 							<Box />
 						}
-						<Box display={'flex'} alignItems={'center'} pr={10} gap={4}>
+						{
+							!smDown &&
+							<Box display={'flex'} alignItems={'center'} pr={10} gap={4}>
 
-							<Box display={'flex'} gap={1} alignItems={'center'}>
-								<Box height={10} width={10} border={1} sx={{ backgroundColor: EErrorsColor.HighError }} />
-								<Typography fontWeight={'bold'}>
-									Erro Grave
-								</Typography>
+								<Box display={'flex'} gap={1} alignItems={'center'}>
+									<Box height={10} width={10} border={1} sx={{ backgroundColor: EErrorsColor.HighError }} />
+									<Typography fontWeight={'bold'}>
+										Erro Grave
+									</Typography>
+								</Box>
+								<Box display={'flex'} gap={1} alignItems={'center'}>
+									<Box height={10} width={10} border={1} sx={{ backgroundColor: EErrorsColor.MediumError }} />
+									<Typography fontWeight={'bold'}>
+										Erro
+									</Typography>
+								</Box>
+								<Box display={'flex'} gap={1} alignItems={'center'}>
+									<Box height={12} width={12} borderRadius={90} sx={{ backgroundColor: EErrorsColor.CardlessError }} />
+									<Typography fontWeight={'bold'}>
+										Caixa sem cartão
+									</Typography>
+								</Box>
 							</Box>
-							<Box display={'flex'} gap={1} alignItems={'center'}>
-								<Box height={10} width={10} border={1} sx={{ backgroundColor: EErrorsColor.MediumError }} />
-								<Typography fontWeight={'bold'}>
-									Erro
-								</Typography>
-							</Box>
-							<Box display={'flex'} gap={1} alignItems={'center'}>
-								<Box height={12} width={12} borderRadius={90} sx={{ backgroundColor: EErrorsColor.CardlessError }} />
-								<Typography fontWeight={'bold'}>
-									Caixa sem cartão
-								</Typography>
-							</Box>
-						</Box>
+						}
 					</Box>
 
 				</Paper>
