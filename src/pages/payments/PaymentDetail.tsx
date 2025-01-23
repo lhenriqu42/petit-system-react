@@ -5,12 +5,14 @@ import { LayoutMain } from "../../shared/layouts";
 import ReplyAllRoundedIcon from '@mui/icons-material/ReplyAllRounded';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import { Box, Button, Paper, Skeleton, TextField, Typography } from "@mui/material";
+import { Box, Button, Paper, Skeleton, TextField, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { format } from "date-fns";
 
 export const PaymentDetail: React.FC = () => {
+	const theme = useTheme();
+	const smDown = useMediaQuery(theme.breakpoints.down('sm'));
+
 	const { id } = useParams();
-	// const [loading, setLoading] = useState(true);
 	const [desc, setDesc] = useState('');
 	const [payment, setPayment] = useState<IPaymentResponse>();
 	const [copied, setCopied] = useState(false);
@@ -72,11 +74,11 @@ export const PaymentDetail: React.FC = () => {
 			</Paper>
 			<Paper sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1 }}>
 				<Box margin={5}>
-					<Typography variant="h4" margin={1}>{payment?.expiration ? 'Validade: ' + format(payment.expiration, 'dd / MM / yyyy') : <Skeleton sx={{ maxWidth: 300 }} />}</Typography>
+					<Typography variant={smDown ? 'h6' : 'h4'} margin={1}>{payment?.expiration ? 'Validade: ' + format(payment.expiration, !smDown ? 'dd / MM / yyyy' : 'dd / MM / yy') : <Skeleton sx={{ maxWidth: 300 }} />}</Typography>
 					<Typography variant="h6" margin={1}>{payment?.name ? 'Fornecedor: ' + payment.name : <Skeleton sx={{ maxWidth: 300 }} />}</Typography>
 					{payment?.code ?
-						<Box display={'flex'} alignItems={'center'} gap={1}>
-							<Typography variant="h6" margin={1}> Código: {payment.code}</Typography>
+						<Box display={'flex'} alignItems={smDown ? '' : 'center'} gap={1} flexDirection={smDown ? 'column' : 'row'}>
+							<Typography variant="h6" margin={1} overflow="hidden" textOverflow="ellipsis"> Código: {payment.code}</Typography>
 							<Button
 								onClick={() => { navigator.clipboard.writeText(payment.code); setCopied(true); }}
 								variant="outlined"
