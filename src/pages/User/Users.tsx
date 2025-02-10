@@ -6,11 +6,12 @@ import { LayoutMain } from "../../shared/layouts";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { EUserRole, IUser, UserService } from "../../shared/services/api/UserService";
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Fab, Icon, Paper, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Fab, Icon, Pagination, Paper, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, useTheme } from "@mui/material";
 import { VForm } from "../../shared/forms/VForm";
 import { FormHandles } from "@unform/core";
 import { VTextField } from "../../shared/forms/VTextField";
 import { IMenuItens, VSelect } from '../../shared/forms/VSelect';
+import { Environment } from '../../shared/environment';
 
 interface IFormDataValidated {
 	name: string;
@@ -165,32 +166,42 @@ export const Users: React.FC = () => {
 				</Box>
 			</Paper>
 			<Paper variant="elevation" sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1, width: 'auto', minHeight: 600 }}>
-				<Table>
-					<TableHead>
-						<TableRow>
-							<TableCell>Nome</TableCell>
-							<TableCell>Email</TableCell>
-							<TableCell>Cargo</TableCell>
-							<TableCell>Ações</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{
-							rows.map((row) => (
-								<TableRow hover key={row.id}>
-									<TableCell><Typography>{row.name}</Typography></TableCell>
-									<TableCell><Typography>{row.email}</Typography></TableCell>
-									<TableCell><Typography>{row.role}</Typography></TableCell>
-									<TableCell>
-										<Fab size="medium" color="error" onClick={() => handleDelete(row.id, row.name)}>
-											<Icon>delete</Icon>
-										</Fab>
-									</TableCell>
-								</TableRow>
-							))
-						}
-					</TableBody>
-				</Table>
+				<Box minHeight={550}>
+					<Table>
+						<TableHead>
+							<TableRow>
+								<TableCell>Nome</TableCell>
+								<TableCell>Email</TableCell>
+								<TableCell>Cargo</TableCell>
+								<TableCell>Ações</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{
+								rows.map((row) => (
+									<TableRow hover key={row.id}>
+										<TableCell><Typography>{row.name}</Typography></TableCell>
+										<TableCell><Typography>{row.email}</Typography></TableCell>
+										<TableCell><Typography>{row.role}</Typography></TableCell>
+										<TableCell>
+											<Fab size="medium" color="error" onClick={() => handleDelete(row.id, row.name)}>
+												<Icon>delete</Icon>
+											</Fab>
+										</TableCell>
+									</TableRow>
+								))
+							}
+						</TableBody>
+					</Table>
+				</Box>
+				<Pagination
+					sx={{ m: 1 }}
+					disabled={loading}
+					page={Number(page)}
+					count={Math.ceil(totalCount / Environment.LIMITE_DE_LINHAS)}
+					onChange={(_, newPage) => { setSearchParams({ page: newPage.toString() }, { replace: true }); }}
+					siblingCount={1}
+				/>
 			</Paper>
 
 			{/* ADD MODAL */}
