@@ -1,5 +1,6 @@
 import {
-    Sale,
+	Sale,
+	Users,
     Stock,
     Groups,
     Page404,
@@ -79,6 +80,9 @@ export const AppRoutes = () => {
             {/* Pagamentos / Boletos */}
             <Route path="/boletos" element={<Payments />} />
             <Route path="/boleto/:id" element={<PaymentDetail />} />
+            
+			{/* Usuários */}
+            <Route path="/usuarios" element={<Users />} />
 
 
             {/* Página 404 */}

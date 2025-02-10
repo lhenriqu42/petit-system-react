@@ -358,13 +358,13 @@ export const AllFincashs: React.FC = () => {
 								<Box display={'flex'} gap={1} alignItems={'center'}>
 									<Box height={10} width={10} border={1} sx={{ backgroundColor: EErrorsColor.HighError }} />
 									<Typography fontWeight={'bold'}>
-										Erro Grave
+										Importante
 									</Typography>
 								</Box>
 								<Box display={'flex'} gap={1} alignItems={'center'}>
 									<Box height={10} width={10} border={1} sx={{ backgroundColor: EErrorsColor.MediumError }} />
 									<Typography fontWeight={'bold'}>
-										Erro
+										Aviso
 									</Typography>
 								</Box>
 								<Box display={'flex'} gap={1} alignItems={'center'}>
