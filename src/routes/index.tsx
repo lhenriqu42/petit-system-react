@@ -26,12 +26,9 @@ import {
     ProductOutput,
     PaymentDetail,
 } from '../pages';
-import { Button } from '@mui/material';
 import { Routes, Route } from 'react-router-dom';
-import { useDrawerContext } from '../shared/contexts';
 
 export const AppRoutes = () => {
-    const { toggleDrawerOpen } = useDrawerContext();
     return (
         <Routes>
             <Route path="/" element={<Sale />} />
