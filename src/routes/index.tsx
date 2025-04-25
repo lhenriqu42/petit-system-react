@@ -1,5 +1,6 @@
 import {
-    Sale,
+	Sale,
+	Users,
     Stock,
     Groups,
     Page404,
@@ -33,7 +34,7 @@ export const AppRoutes = () => {
     const { toggleDrawerOpen } = useDrawerContext();
     return (
         <Routes>
-            <Route path="/" element={<Button variant='contained' color='primary' onClick={toggleDrawerOpen}>test</Button>} />
+            <Route path="/" element={<Sale />} />
             <Route path="/dashboard" element={<Dashboard />} />9
 
             {/* Produtos */}
@@ -79,6 +80,9 @@ export const AppRoutes = () => {
             {/* Pagamentos / Boletos */}
             <Route path="/boletos" element={<Payments />} />
             <Route path="/boleto/:id" element={<PaymentDetail />} />
+            
+			{/* Usuários */}
+            <Route path="/usuarios" element={<Users />} />
 
 
             {/* Página 404 */}

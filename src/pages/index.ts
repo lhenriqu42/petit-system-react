@@ -46,3 +46,6 @@ export * from './promotions/Promotions';
 // Payments
 export * from './payments/Payments';
 export * from './payments/PaymentDetail';
+
+// Users
+export * from './User/Users';

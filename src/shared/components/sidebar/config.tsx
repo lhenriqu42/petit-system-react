@@ -1,7 +1,6 @@
-// import SavingsIcon from '@mui/icons-material/Savings';
-// import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import AllInboxIcon from '@mui/icons-material/AllInbox';
 import FolderRoundedIcon from '@mui/icons-material/FolderRounded';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ArchiveRoundedIcon from '@mui/icons-material/ArchiveRounded';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -80,22 +79,22 @@ export const items = [
         icon: (<RequestQuoteRoundedIcon fontSize='small' />),
         role: ['admin']
     },
-    // {
-    //     title: 'Vendas (todas)',
-    //     path: '/vendas/admin',
-    //     icon: (<QueryStatsIcon fontSize='small' />),
-    //     role: ['admin']
-    // },
     {
-        title: 'Saídas (Produtos)',
+		title: 'Saídas (Produtos)',
         path: '/saida/produto',
         icon: (<CallMissedOutgoingIcon fontSize='small' />),
         role: ['employee', 'admin']
     },
     {
-        title: 'Boletos',
+		title: 'Boletos',
         path: '/boletos',
         icon: (<AccountBalanceIcon fontSize='small' />),
         role: ['admin']
-    }
+    },
+	{
+		title: 'Usuários',
+		path: '/usuarios',
+		icon: (<AccountCircleIcon fontSize='small' />),
+		role: ['admin']
+	},
 ];

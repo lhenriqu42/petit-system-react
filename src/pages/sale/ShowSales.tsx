@@ -177,15 +177,15 @@ export const ShowSales: React.FC = () => {
 				<Paper variant="elevation" sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1, width: 'auto' }}>
 					<Box minHeight={625}>
 						<TableContainer>
-							<Table sx={{ minWidth: 650 }} aria-label="simple table">
+							<Table sx={{ minWidth: smDown ? 200 : 650 }} aria-label="simple table">
 								<TableHead>
 									<TableRow>
-										<TableCell>Venda</TableCell>
+										{!smDown && <TableCell>Venda</TableCell>}
 										<TableCell>Horário</TableCell>
 										<TableCell>Valor</TableCell>
 										<TableCell>Ações</TableCell>
-										<TableCell>Observações</TableCell>
-										{!id && <TableCell sx={{ width: 80 }}>Cancelamento</TableCell>}
+										{!smDown && <TableCell>Observações</TableCell>}
+										{!id && !smDown && <TableCell sx={{ width: 80 }}>Cancelamento</TableCell>}
 									</TableRow>
 								</TableHead>
 
@@ -202,7 +202,7 @@ export const ShowSales: React.FC = () => {
 															{ '&:hover': { backgroundColor: '#1111' } }
 													}
 												>
-													<TableCell>{row.sale_id}</TableCell>
+													{!smDown && <TableCell>{row.sale_id}</TableCell>}
 													<TableCell>{format(row.created_at, 'HH:mm:ss')}</TableCell>
 													<TableCell>{nToBRL(row.total_value)}</TableCell>
 													<TableCell>
@@ -218,13 +218,15 @@ export const ShowSales: React.FC = () => {
 															</Fab>
 														</Link>
 													</TableCell>
-													<TableCell sx={{ maxWidth: 120 }}>
-														<Typography noWrap overflow="hidden" textOverflow="ellipsis" marginRight={6}>
-															{row.obs}
-														</Typography>
-													</TableCell>
+													{!smDown &&
+														<TableCell sx={{ maxWidth: 120 }}>
+															<Typography noWrap overflow="hidden" textOverflow="ellipsis" marginRight={6}>
+																{row.obs}
+															</Typography>
+														</TableCell>
+													}
 													{
-														!id &&
+														!id && !smDown &&
 														<TableCell>
 															{
 																!row.deleted_at &&
