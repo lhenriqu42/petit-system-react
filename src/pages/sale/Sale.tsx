@@ -1,16 +1,41 @@
-import { Paper, Grid, Box, TextField, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Alert, useMediaQuery, useTheme, Typography, Button, Skeleton } from "@mui/material";
+import {
+	Box,
+	Grid,
+	Table,
+	Paper,
+	Alert,
+	Button,
+	useTheme,
+	Skeleton,
+	TextField,
+	TableHead,
+	TableRow,
+	TableCell,
+	TableBody,
+	Typography,
+	useMediaQuery,
+	TableContainer,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+} from "@mui/material";
+import Swal from 'sweetalert2'
+import { useNavigate } from "react-router-dom";
 import { LayoutMain } from "../../shared/layouts";
 import { useEffect, useRef, useState } from "react";
-import { FincashService, IFincash, SaleService, GroupService, IGroup, ISaleObs } from "../../shared/services/api";
-import { useNavigate } from "react-router-dom";
+import SettingsIcon from '@mui/icons-material/Settings';
+import CalculateIcon from '@mui/icons-material/Calculate';
+import { BRLToN, nToBRL } from "../../shared/services/formatters";
+import FastRewindIcon from '@mui/icons-material/FastRewind';
 import { IProduct, ProductService } from './../../shared/services/api/';
 import ArrowLeftRoundedIcon from '@mui/icons-material/ArrowLeftRounded';
 import ArrowRightRoundedIcon from '@mui/icons-material/ArrowRightRounded';
 import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
-import Swal from 'sweetalert2'
-import SettingsIcon from '@mui/icons-material/Settings';
-import FastRewindIcon from '@mui/icons-material/FastRewind';
-import { nToBRL } from "../../shared/services/formatters";
+import { FincashService, IFincash, SaleService, GroupService, IGroup, ISaleObs } from "../../shared/services/api";
+import { VTextField } from "../../shared/forms/VTextField";
+import { VForm } from "../../shared/forms/VForm";
+import { CustomTextField } from "../../shared/forms/customInputs/CustomTextField";
 
 const NUMBER_OF_SKELETONS_GROUP = Array(18).fill(null);
 const NUMBER_OF_SKELETONS_PROD = Array(7).fill(null);
@@ -48,7 +73,7 @@ export const Sale: React.FC = () => {
 			fetchData();
 		} else {
 			alert('Essa tela não funciona em smartphones')
-			navigate('/');
+			navigate('/produtos');
 		}
 		// codeInputRef.current?.addEventListener('blur', () => {
 		// 	if (!obsFocus) inputFocus();
@@ -286,12 +311,37 @@ export const Sale: React.FC = () => {
 		setSelectedGroup(0);
 		setProdGroup(undefined);
 	}
+
+	// CALC MODAL
+	const [open, setOpen] = useState(false);
+	const [modal, setModal] = useState(false);
+	const [calcValue, setCalcValue] = useState(0);
+	const [calcResult, setCalcResult] = useState(0);
+
+	const changeInputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		const calc = calcValue - totalPrice;
+		console.log(totalPrice, calcValue, calc);
+		setCalcResult(calc);
+	}, [totalPrice, calcValue]);
+
+	const handleOpen = () => {
+		setOpen(true);
+		setModal(true);
+	}
+
+	const handleClose = () => {
+		setOpen(false);
+		setCalcValue(0);
+	}
+
 	return (
 		<LayoutMain title="Vender" subTitle="">
 			<Grid container spacing={2}>
 				<Grid item xs={6}>
 					<Paper variant="elevation" sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1, width: 'auto' }}>
-						<Box display={'flex'}>
+						<Box display={'flex'} gap={1} justifyContent={'space-between'} p={'3px'}>
 							<TextField
 								fullWidth
 								size="small"
@@ -302,11 +352,12 @@ export const Sale: React.FC = () => {
 								autoComplete="off"
 								disabled={submitLoading}
 								onBlur={() => {
-									if (!obsFocus) {
+									if (!obsFocus && !modal) {
 										inputFocus()
 									}
 								}}
 							/>
+							<Button disabled={modal} variant="contained" onClick={handleOpen}><CalculateIcon sx={{ mr: 1 }} />Troco</Button>
 						</Box>
 					</Paper>
 					<Paper variant="elevation" sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1, width: 'auto' }}>
@@ -518,6 +569,42 @@ export const Sale: React.FC = () => {
 					</Paper>
 				</Grid >
 			</Grid >
+			{/* ------------------- ------------------- CALC MODAL ------------------- ------------------- */}
+			<Dialog
+				open={open}
+				onClose={handleClose}
+				TransitionProps={{
+					onEntered: () => {
+						changeInputRef.current?.focus();
+					},
+					onExited: () => {
+						setModal(false);
+						inputFocus();
+					}
+				}}
+				sx={{
+					"& .MuiDialog-paper":
+						{ backgroundColor: "#fff", }
+				}}>
+				<DialogTitle>Calculadora de Troco</DialogTitle>
+				<DialogContent>
+					<Box marginY={1} display={'flex'} flexDirection={'column'} gap={1}>
+						<CustomTextField
+							callBack={(value) => setCalcValue(BRLToN(value))}
+							onKeyDown={(e) => { if (e.code === 'Enter' || e.key === 'Enter' || e.key == ' ' || e.code == 'Space') handleClose() }}
+							inputRef={changeInputRef}
+							label={'Valor'}
+							cash
+						/>
+						<Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+							<Typography variant="h6">Troco: </Typography>
+							<Typography variant="h6" color={calcResult < 0 ? 'red' : 'green'} mr={2}>
+								{nToBRL(calcResult)}
+							</Typography>
+						</Box>
+					</Box>
+				</DialogContent>
+			</Dialog>
 		</LayoutMain >
 	);
 };
