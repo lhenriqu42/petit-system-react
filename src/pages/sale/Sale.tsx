@@ -18,7 +18,6 @@ import {
 	Dialog,
 	DialogTitle,
 	DialogContent,
-	DialogContentText,
 } from "@mui/material";
 import Swal from 'sweetalert2'
 import { useNavigate } from "react-router-dom";
@@ -33,8 +32,6 @@ import ArrowLeftRoundedIcon from '@mui/icons-material/ArrowLeftRounded';
 import ArrowRightRoundedIcon from '@mui/icons-material/ArrowRightRounded';
 import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
 import { FincashService, IFincash, SaleService, GroupService, IGroup, ISaleObs } from "../../shared/services/api";
-import { VTextField } from "../../shared/forms/VTextField";
-import { VForm } from "../../shared/forms/VForm";
 import { CustomTextField } from "../../shared/forms/customInputs/CustomTextField";
 
 const NUMBER_OF_SKELETONS_GROUP = Array(18).fill(null);
