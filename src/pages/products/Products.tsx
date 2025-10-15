@@ -110,7 +110,7 @@ export const Products: React.FC = () => {
     const listProducts = async () => {
         try {
 
-            const result = await ProductService.getAll(Number(page), search);
+            const result = await ProductService.getAll(Number(page), 7, search);
 
             if (result instanceof Error) {
                 alert(result.message);

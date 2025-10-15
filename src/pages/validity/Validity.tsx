@@ -64,7 +64,7 @@ export const Validity: React.FC = () => {
 
 	const listProducts = async () => {
 		setLoadingPageProd(true);
-		const response = await ProductService.getAll(Number(prodPage), prodSearch, PRODUCT_ROW_LIMIT);
+		const response = await ProductService.getAll(Number(prodPage), PRODUCT_ROW_LIMIT, prodSearch);
 		if (response instanceof Error) return alert('Erro ao procurar por produtos');
 		setProdRows(response.data);
 		setProdTotalCount(response.totalCount);
@@ -225,7 +225,7 @@ export const Validity: React.FC = () => {
 								autoComplete="off"
 								value={prodSearch}
 								placeholder={'Pesquisar'}
-								onChange={(event) => { setSearchParams((old) => { old.set('prodSearch', event.target.value);old.delete('prodPage'); return old; }) }}
+								onChange={(event) => { setSearchParams((old) => { old.set('prodSearch', event.target.value); old.delete('prodPage'); return old; }) }}
 							/>
 						</Box>
 					</Paper>

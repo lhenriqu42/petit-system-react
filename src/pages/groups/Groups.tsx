@@ -190,8 +190,8 @@ export const Groups: React.FC = () => {
       setLoadingProd(true);
       await ProductService.getAll(
         Number(prodPage),
+        PROD_ROW_LIMIT,
         prodSearch,
-        PROD_ROW_LIMIT
       ).then((result) => {
         if (result instanceof Error) {
           alert(result.message);

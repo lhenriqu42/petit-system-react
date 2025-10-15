@@ -117,7 +117,7 @@ export const Stock: React.FC = () => {
 	};
 
 	const getAllProducts = async () => {
-		const response = await ProductService.getAll(1, '', 999999999);
+		const response = await ProductService.getAll(1, 999999999);
 		if (response instanceof Error) {
 			alert('ocorreu algum erro')
 		}
