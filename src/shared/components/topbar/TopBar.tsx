@@ -72,7 +72,7 @@ export const TopBar: React.FC = () => {
 						spacing={5}
 					>
 
-						<Tooltip title="Notificações">
+						{/* <Tooltip title="Notificações">
 							<IconButton>
 								<Badge
 									badgeContent={4}
@@ -84,7 +84,7 @@ export const TopBar: React.FC = () => {
 
 								</Badge>
 							</IconButton>
-						</Tooltip>
+						</Tooltip> */}
 						<Avatar
 							onClick={handleOpenUserMenu}
 							sx={{

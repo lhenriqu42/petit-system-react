@@ -27,11 +27,12 @@ import {
     PaymentDetail,
 } from '../pages';
 import { Routes, Route } from 'react-router-dom';
+import { PurchasesList } from '../pages/Purchases/PurchasesList';
 
 export const AppRoutes = () => {
     return (
         <Routes>
-            <Route path="/" element={<Sale />} />
+            <Route path="/" element={<Products />} />
             <Route path="/dashboard" element={<Dashboard />} />9
 
             {/* Produtos */}
@@ -80,6 +81,9 @@ export const AppRoutes = () => {
             
 			{/* Usuários */}
             <Route path="/usuarios" element={<Users />} />
+
+			{/* Compras */}
+			<Route path="/compras" element={<PurchasesList />} />
 
 
             {/* Página 404 */}
