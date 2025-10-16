@@ -12,7 +12,7 @@ import {
 	CircularProgress
 } from "@mui/material";
 import './../../shared/css/sweetAlert.css';
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useId } from "react";
 import { Environment } from "../environment";
 import { useSearchParams } from "react-router-dom";
 
@@ -27,23 +27,27 @@ interface PaginationProps<TData, TFilter = undefined> {
 	itemsPerPage?: number;
 	filters?: TFilter;
 	minHeight?: number;
+	height?: number;
 	CustomTableRow: React.FC<{ row: TData }>;
-	CustomTableRowHeader: React.FC;
+	CustomTableRowHeader?: React.FC;
 	CustomTableSkeleton?: React.FC;
+	CircularProgressSize?: number;
 }
 
 export function ListItems<TData, TFilter = undefined>({
 	apiCall,
+	CircularProgressSize = 13,
 	itemsPerPage = Environment.LIMITE_DE_LINHAS,
 	filters,
-	minHeight = 625,
+	minHeight,
+	height,
 	CustomTableRow,
 	CustomTableRowHeader,
 	CustomTableSkeleton = function () {
 		return (
 			<TableRow>
 				<TableCell colSpan={6}>
-					<CircularProgress />
+					<CircularProgress size={CircularProgressSize} />
 				</TableCell>
 			</TableRow>
 		);
@@ -51,6 +55,7 @@ export function ListItems<TData, TFilter = undefined>({
 
 
 }: PaginationProps<TData, TFilter>) {
+	const uniqueId = useId();
 	const NUMBER_OF_SKELETONS = Array(itemsPerPage).fill(null);
 
 	const theme = useTheme();
@@ -61,7 +66,7 @@ export function ListItems<TData, TFilter = undefined>({
 	const [totalCount, setTotalCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 
-	const page = useMemo(() => Number(searchParams.get('page') || '1'), [searchParams]);
+	const page = useMemo(() => Number(searchParams.get('page' + uniqueId) || '1'), [searchParams]);
 
 	const list = async () => {
 		setLoading(true);
@@ -84,13 +89,20 @@ export function ListItems<TData, TFilter = undefined>({
 		list();
 	}, [page, filters]);
 
+	useEffect(() => {
+		setSearchParams((old) => {
+			old.set("page" + uniqueId, "1");
+			return old;
+		});
+	}, [filters]);
+
 	return (
 		<div>
-			<Box minHeight={minHeight}>
+			<Box minHeight={minHeight} my={2} height={height} sx={{ position: 'relative' }}>
 				<TableContainer>
-					<Table sx={{ minWidth: smDown ? 200 : 650 }} aria-label="simple table">
+					<Table aria-label="simple table">
 						<TableHead>
-							<CustomTableRowHeader />
+							{CustomTableRowHeader && <CustomTableRowHeader />}
 						</TableHead>
 
 						<TableBody>
@@ -108,24 +120,27 @@ export function ListItems<TData, TFilter = undefined>({
 						</TableBody>
 
 						{totalCount === 0 && !loading && (
-							<caption>Nenhuma venda efetuada</caption>
+							<caption>Nenhum registro encontrado</caption>
 						)}
 					</Table>
 				</TableContainer>
 			</Box>
-			{(totalCount > 0 && totalCount > Environment.LIMITE_DE_LINHAS) && (
-				<Pagination
-					page={Number(page)}
-					count={Math.ceil(totalCount / Environment.LIMITE_DE_LINHAS)}
-					onChange={(_, newPage) =>
-						setSearchParams((old) => {
-							old.set("page", newPage.toString());
-							return old;
-						})
-					}
-					siblingCount={smDown ? 0 : 1}
-				/>
-			)}
+			<Box height={32}>
+				{(totalCount > 0 && totalCount > itemsPerPage) && (
+					<Pagination
+						disabled={loading}
+						page={Number(page)}
+						count={Math.ceil(totalCount / itemsPerPage)}
+						onChange={(_, newPage) =>
+							setSearchParams((old) => {
+								old.set("page" + uniqueId, newPage.toString());
+								return old;
+							})
+						}
+						siblingCount={smDown ? 0 : 1}
+					/>
+				)}
+			</Box>
 		</div>
 	);
 }
