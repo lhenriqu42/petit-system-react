@@ -5,10 +5,11 @@ import { nToBRL } from "../../services/formatters";
 type CustomTextFieldProps = TextFieldProps & {
 	valueDefault?: string;
 	cash?: boolean;
+	unsigned?: boolean;
 	callBack?: (value: string) => void;
 }
 
-export const CustomTextField: React.FC<CustomTextFieldProps> = ({ callBack, valueDefault, cash, ...rest }) => {
+export const CustomTextField: React.FC<CustomTextFieldProps> = ({ callBack, valueDefault, cash, unsigned, ...rest }) => {
 
 	const [value, setValue] = useState(valueDefault ? valueDefault : cash ? 'R$ 0,00' : '');
 
@@ -21,6 +22,9 @@ export const CustomTextField: React.FC<CustomTextFieldProps> = ({ callBack, valu
 
 	const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		let value = event.target.value;
+		if (unsigned) {
+			value = value.replace(/-/g, '');
+		}
 		if (cash)
 			value = handleCashChange(value);
 		setValue(value);

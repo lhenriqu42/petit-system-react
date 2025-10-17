@@ -1,23 +1,22 @@
 import { Autocomplete, TextField } from "@mui/material";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface IAutoCompleteProps {
 	options: { id: number; label: string }[];
-	required?: boolean;
 	label?: string;
 	size?: 'small' | 'medium';
 	minWidth?: number;
+	callback?: (selected: { id: number; label: string }) => void;
 }
 
-export const CustomAutoComplete: React.FC<IAutoCompleteProps> = ({ options, required, size = 'medium', label, minWidth }) => {
+export const CustomAutoComplete: React.FC<IAutoCompleteProps> = ({ options, size = 'medium', label, minWidth, callback }) => {
 	const [selected, setSelected] = useState<{ id: number; label: string }>({ id: -1, label: '' });
-	
+
 	const inputRef = useRef<HTMLInputElement>(null);
-	
+
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		const filteredOptions = options.filter(option => option.label.toLowerCase().includes((e.target as HTMLInputElement).value.toLowerCase()));
-		if (e.code === 'Enter' || e.key === 'Enter')
-		{
+		if (e.code === 'Enter' || e.key === 'Enter') {
 			setSelected(filteredOptions[0]);
 			inputRef.current?.blur();
 		}
@@ -29,6 +28,10 @@ export const CustomAutoComplete: React.FC<IAutoCompleteProps> = ({ options, requ
 			setSelected(filteredOptions[0]);
 		}
 	}
+
+	useEffect(() => {
+		callback?.(selected);
+	}, [selected]);
 
 	return (
 		<Autocomplete
