@@ -26,12 +26,13 @@ interface PaginationProps<TData, TFilter = undefined> {
 	apiCall: GetAllFunction<TData, TFilter>;
 	itemsPerPage?: number;
 	filters?: TFilter;
-	minHeight?: number;
-	height?: number;
+	minHeight?: number | string;
+	height?: number | string;
 	CustomTableRow: React.FC<{ row: TData }>;
 	CustomTableRowHeader?: React.FC;
 	CustomTableSkeleton?: React.FC;
 	CircularProgressSize?: number;
+	size?: "small" | "medium" | "large";
 }
 
 export function ListItems<TData, TFilter = undefined>({
@@ -40,9 +41,10 @@ export function ListItems<TData, TFilter = undefined>({
 	itemsPerPage = Environment.LIMITE_DE_LINHAS,
 	filters,
 	minHeight,
-	height,
 	CustomTableRow,
+	height = '100%',
 	CustomTableRowHeader,
+	size = "medium",
 	CustomTableSkeleton = function () {
 		return (
 			<TableRow>
@@ -97,8 +99,8 @@ export function ListItems<TData, TFilter = undefined>({
 	}, [filters]);
 
 	return (
-		<div>
-			<Box minHeight={minHeight} my={2} height={height} sx={{ position: 'relative' }}>
+		<Box height={height} display={'flex'} flexDirection={'column'} justifyContent={'space-between'}>
+			<Box minHeight={minHeight} height={'100%'} sx={{ position: 'relative' }}>
 				<TableContainer>
 					<Table aria-label="simple table">
 						<TableHead>
@@ -125,7 +127,7 @@ export function ListItems<TData, TFilter = undefined>({
 					</Table>
 				</TableContainer>
 			</Box>
-			<Box height={32}>
+			<Box height={32} display={'flex'} alignItems={'center'}>
 				{(totalCount > 0 && totalCount > itemsPerPage) && (
 					<Pagination
 						disabled={loading}
@@ -138,9 +140,10 @@ export function ListItems<TData, TFilter = undefined>({
 							})
 						}
 						siblingCount={smDown ? 0 : 1}
+						size={size}
 					/>
 				)}
 			</Box>
-		</div>
+		</Box>
 	);
 }

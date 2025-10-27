@@ -13,6 +13,7 @@ export interface IModalProps {
 	title: string;
 	fullWidth?: boolean;
 	cancelButton?: boolean;
+	submitButton?: boolean;
 	submit?: () => void;
 	submitButtonProps?: IButtonProps;
 	ModalContent?: React.ReactNode;
@@ -26,6 +27,7 @@ export const Modal: React.FC<IModalProps> = ({
 	title,
 	fullWidth = true,
 	cancelButton = true,
+	submitButton = true,
 	submitButtonProps,
 	ModalContent,
 	maxWidth = 'lg',
@@ -55,6 +57,7 @@ export const Modal: React.FC<IModalProps> = ({
 			<DialogActions>
 				{cancelButton && <Button onClick={handleClose}>Cancelar</Button>}
 				{
+					submitButton &&
 					<Button
 						onClick={submit}
 						variant={(submitButtonProps && submitButtonProps.variant) || "contained"}
