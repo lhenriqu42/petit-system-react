@@ -15,6 +15,7 @@ import './../../shared/css/sweetAlert.css';
 import { useEffect, useMemo, useState, useId } from "react";
 import { Environment } from "../environment";
 import { useSearchParams } from "react-router-dom";
+import { listReloadEvent } from "../../shared/events/listReload";
 
 type GetAllFunction<TData, TFilter = undefined> = (
 	page?: number,
@@ -24,6 +25,7 @@ type GetAllFunction<TData, TFilter = undefined> = (
 
 interface PaginationProps<TData, TFilter = undefined> {
 	apiCall: GetAllFunction<TData, TFilter>;
+	eventName?: string;
 	itemsPerPage?: number;
 	filters?: TFilter;
 	minHeight?: number | string;
@@ -37,6 +39,7 @@ interface PaginationProps<TData, TFilter = undefined> {
 
 export function ListItems<TData, TFilter = undefined>({
 	apiCall,
+	eventName = "",
 	CircularProgressSize = 13,
 	itemsPerPage = Environment.LIMITE_DE_LINHAS,
 	filters,
@@ -97,6 +100,15 @@ export function ListItems<TData, TFilter = undefined>({
 			return old;
 		});
 	}, [filters]);
+
+	useEffect(() => {
+		const unsubscribe = listReloadEvent.on((target) => {
+			if (target == "*" || target == eventName) {
+				list();
+			}
+		});
+		return unsubscribe; // remove listener ao desmontar
+	}, []);
 
 	return (
 		<Box height={height} display={'flex'} flexDirection={'column'} justifyContent={'space-between'}>
