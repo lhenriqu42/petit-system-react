@@ -117,14 +117,12 @@ export const Packs: React.FC = () => {
 				icon: 'success',
 				title: 'Sucesso',
 				text: 'Relação realizada com sucesso!',
-				didClose: () => {
-					;
+				willClose: () => {
+					modalCloseEvent.emit("*");
 				}
 			});
 		} catch (error) {
 			alert(error);
-		} finally {
-			modalCloseEvent.emit("*");
 		}
 	};
 
