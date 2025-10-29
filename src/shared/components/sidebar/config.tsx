@@ -12,6 +12,7 @@ import LocalOfferRoundedIcon from '@mui/icons-material/LocalOfferRounded';
 import CallMissedOutgoingIcon from '@mui/icons-material/CallMissedOutgoing';
 import ShoppingCartRoundedIcon from '@mui/icons-material/ShoppingCartRounded';
 import RequestQuoteRoundedIcon from '@mui/icons-material/RequestQuoteRounded';
+import InventoryIcon from '@mui/icons-material/Inventory';
 
 export const items = [
 	{
@@ -90,6 +91,12 @@ export const items = [
 		title: 'Boletos',
 		path: '/boletos',
 		icon: (<AccountBalanceIcon fontSize='small' />),
+		role: ['admin']
+	},
+	{
+		title: 'Embalagens',
+		path: '/embalagens',
+		icon: (<InventoryIcon fontSize='small' />),
 		role: ['admin']
 	},
 	{
