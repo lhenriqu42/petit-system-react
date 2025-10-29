@@ -1,3 +1,3 @@
 import { EventEmitter } from "../utils/EventEmitter";
 
-export const listReloadEvent = new EventEmitter<string>(); 
+export const listReloadEvent = new EventEmitter<string>();

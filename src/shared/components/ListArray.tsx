@@ -2,14 +2,11 @@ import {
 	Box,
 	Table,
 	useTheme,
-	TableRow,
 	TableHead,
-	TableCell,
 	TableBody,
 	Pagination,
 	useMediaQuery,
 	TableContainer,
-	CircularProgress
 } from "@mui/material";
 import './../../shared/css/sweetAlert.css';
 import { useEffect, useMemo, useState, useId } from "react";
@@ -17,53 +14,34 @@ import { Environment } from "../environment";
 import { useSearchParams } from "react-router-dom";
 import { listReloadEvent } from "../../shared/events/listReload";
 
-export type GetAllFunction<TData, TFilter = undefined> = (
-	page?: number,
-	limit?: number,
-	filter?: TFilter
-) => Promise<{ data: TData[]; totalCount: number } | Error>;
-
-interface PaginationProps<TData, TFilter = undefined> {
-	apiCall: GetAllFunction<TData, TFilter>;
+interface PaginationProps<TData> {
+	items: TData[];
 	eventName?: string;
 	itemsPerPage?: number;
-	filters?: TFilter;
 	minHeight?: number | string;
 	height?: number | string;
 	CustomTableRow: React.FC<{ row: TData }>;
+	customPlaceHolder?: string;
 	CustomTableRowHeader?: React.FC;
-	CustomTableSkeleton?: React.FC;
-	CircularProgressSize?: number;
 	size?: "small" | "medium" | "large";
 	id?: string;
 }
 
-export function ListItems<TData, TFilter = undefined>({
-	apiCall,
+export function ListArray<TData>({
 	id,
+	items,
 	eventName = id,
-	CircularProgressSize = 13,
 	itemsPerPage = Environment.LIMITE_DE_LINHAS,
-	filters,
+	customPlaceHolder = "Nenhum dado encontrado.",
 	minHeight,
 	CustomTableRow,
 	height = '100%',
 	CustomTableRowHeader,
 	size = "medium",
-	CustomTableSkeleton = function () {
-		return (
-			<TableRow>
-				<TableCell colSpan={6}>
-					<CircularProgress size={CircularProgressSize} />
-				</TableCell>
-			</TableRow>
-		);
-	}
 
 
-}: PaginationProps<TData, TFilter>) {
+}: PaginationProps<TData>) {
 	const uniqueId = id ?? useId();
-	const NUMBER_OF_SKELETONS = Array(itemsPerPage).fill(null);
 
 	const theme = useTheme();
 	const smDown = useMediaQuery(theme.breakpoints.down('sm'));
@@ -71,45 +49,36 @@ export function ListItems<TData, TFilter = undefined>({
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [rows, setRows] = useState<TData[]>([]);
 	const [totalCount, setTotalCount] = useState(0);
-	const [loading, setLoading] = useState(true);
 
 	const page = useMemo(() => Number(searchParams.get('page' + uniqueId) || '1'), [searchParams]);
 
 	const list = async () => {
-		setLoading(true);
-		try {
-			const result = await apiCall(page, itemsPerPage, filters);
-			if (result instanceof Error) {
-				alert(result.message);
-			} else {
-				setRows(result.data);
-				setTotalCount(result.totalCount);
-			}
-		} catch (e) {
-			console.error(e);
-		} finally {
-			setLoading(false);
+		const startIndex = (page - 1) * itemsPerPage;
+		const endIndex = startIndex + itemsPerPage;
+		// console.log(items);
+		const result = {
+			data: items.slice(startIndex, endIndex),
+			totalCount: items.length
+		};
+		if (result.data.length === 0 && result.totalCount > 0) {
+			setSearchParams((old) => {
+				const lastPage = Math.ceil(result.totalCount / itemsPerPage);
+				old.set("page" + uniqueId, lastPage.toString());
+				return old;
+			});
+			return;
 		}
+		setRows(result.data);
+		setTotalCount(result.totalCount);
 	};
 
 	useEffect(() => {
 		list();
-	}, [page, filters]);
-
-	useEffect(() => {
-		setSearchParams((old) => {
-			old.set("page" + uniqueId, "1");
-			return old;
-		});
-	}, [filters]);
+	}, [page, items]);
 
 	useEffect(() => {
 		const unsubscribe = listReloadEvent.on((target) => {
 			if (target == "*" || target == eventName) {
-				setSearchParams((old) => {
-					old.set("page" + uniqueId, "1");
-					return old;
-				});
 				list();
 			}
 		});
@@ -126,21 +95,17 @@ export function ListItems<TData, TFilter = undefined>({
 						</TableHead>
 
 						<TableBody>
-							{!loading ?
+							{
 								rows?.map(
 									(row) => (
 										<CustomTableRow key={JSON.stringify(row)} row={row} />
 									)
 								)
-								:
-								NUMBER_OF_SKELETONS.map((_, index) => (
-									<CustomTableSkeleton key={index} />
-								))
 							}
 						</TableBody>
 
-						{totalCount === 0 && !loading && (
-							<caption>Nenhum registro encontrado</caption>
+						{totalCount === 0 && (
+							<caption>{customPlaceHolder}</caption>
 						)}
 					</Table>
 				</TableContainer>
@@ -148,7 +113,6 @@ export function ListItems<TData, TFilter = undefined>({
 			<Box height={32} display={'flex'} alignItems={'center'}>
 				{(totalCount > 0 && totalCount > itemsPerPage) && (
 					<Pagination
-						disabled={loading}
 						page={Number(page)}
 						count={Math.ceil(totalCount / itemsPerPage)}
 						onChange={(_, newPage) =>

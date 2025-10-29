@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import './../../shared/css/sweetAlert.css';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { modalCloseEvent } from '../events/modalEvents';
 
 interface IButtonProps {
 	Text: string;
@@ -14,7 +16,7 @@ export interface IModalProps {
 	fullWidth?: boolean;
 	cancelButton?: boolean;
 	submitButton?: boolean;
-	submit?: () => void;
+	submit?: () => Promise<void>;
 	submitButtonProps?: IButtonProps;
 	ModalContent?: React.ReactNode;
 	maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -32,9 +34,33 @@ export const Modal: React.FC<IModalProps> = ({
 	ModalContent,
 	maxWidth = 'lg',
 }) => {
+	const [loading, setLoading] = useState(false);
+
 	const handleClose = () => {
 		onClose();
 	};
+
+	const handleSubmit = async () => {
+		try {
+			setLoading(true);
+			if (submit) {
+				await submit();
+			}
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		const unsubscribe = modalCloseEvent.on((target) => {
+			if (target == "*" || target == title) {
+				handleClose();
+			}
+		});
+		return unsubscribe; // remove listener ao desmontar
+	}, []);
 
 	return (
 		<Dialog
@@ -49,7 +75,7 @@ export const Modal: React.FC<IModalProps> = ({
 			<DialogTitle>{title}</DialogTitle>
 			<DialogContent>
 				<Box py={3} px={1}>
-					<Typography component="p">
+					<Typography component="div">
 						{ModalContent}
 					</Typography>
 				</Box>
@@ -59,11 +85,17 @@ export const Modal: React.FC<IModalProps> = ({
 				{
 					submitButton &&
 					<Button
-						onClick={submit}
+						disabled={loading}
+						onClick={handleSubmit}
 						variant={(submitButtonProps && submitButtonProps.variant) || "contained"}
 						color={(submitButtonProps && submitButtonProps.color) || "primary"}
 					>
-						{(submitButtonProps && submitButtonProps.Text) || "Salvar"}
+						{
+							loading ?
+								<CircularProgress size={24} color="inherit" />
+								:
+								((submitButtonProps && submitButtonProps.Text) || "Salvar")
+						}
 					</Button>
 				}
 			</DialogActions>
