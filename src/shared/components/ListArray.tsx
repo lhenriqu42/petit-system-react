@@ -9,9 +9,8 @@ import {
 	TableContainer,
 } from "@mui/material";
 import './../../shared/css/sweetAlert.css';
-import { useEffect, useMemo, useState, useId } from "react";
+import { useEffect, useState } from "react";
 import { Environment } from "../environment";
-import { useSearchParams } from "react-router-dom";
 import { listReloadEvent } from "../../shared/events/listReload";
 
 interface PaginationProps<TData> {
@@ -30,7 +29,6 @@ interface PaginationProps<TData> {
 export function ListArray<TData>({
 	id,
 	items,
-	eventName = id,
 	itemsPerPage = Environment.LIMITE_DE_LINHAS,
 	customPlaceHolder = "Nenhum dado encontrado.",
 	minHeight,
@@ -41,16 +39,13 @@ export function ListArray<TData>({
 
 
 }: PaginationProps<TData>) {
-	const uniqueId = id ?? useId();
-
 	const theme = useTheme();
 	const smDown = useMediaQuery(theme.breakpoints.down('sm'));
 
-	const [searchParams, setSearchParams] = useSearchParams();
 	const [rows, setRows] = useState<TData[]>([]);
 	const [totalCount, setTotalCount] = useState(0);
 
-	const page = useMemo(() => Number(searchParams.get('page' + uniqueId) || '1'), [searchParams]);
+	const [page, setPage] = useState(1);
 
 	const list = async () => {
 		const startIndex = (page - 1) * itemsPerPage;
@@ -61,10 +56,9 @@ export function ListArray<TData>({
 			totalCount: items.length
 		};
 		if (result.data.length === 0 && result.totalCount > 0) {
-			setSearchParams((old) => {
+			setPage(() => {
 				const lastPage = Math.ceil(result.totalCount / itemsPerPage);
-				old.set("page" + uniqueId, lastPage.toString());
-				return old;
+				return lastPage;
 			});
 			return;
 		}
@@ -78,7 +72,7 @@ export function ListArray<TData>({
 
 	useEffect(() => {
 		const unsubscribe = listReloadEvent.on((target) => {
-			if (target == "*" || target == eventName) {
+			if (target == "*" || target == id) {
 				list();
 			}
 		});
@@ -116,10 +110,7 @@ export function ListArray<TData>({
 						page={Number(page)}
 						count={Math.ceil(totalCount / itemsPerPage)}
 						onChange={(_, newPage) =>
-							setSearchParams((old) => {
-								old.set("page" + uniqueId, newPage.toString());
-								return old;
-							})
+							setPage(newPage)
 						}
 						siblingCount={smDown ? 0 : 1}
 						size={size}

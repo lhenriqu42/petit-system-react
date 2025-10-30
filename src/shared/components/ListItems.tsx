@@ -9,12 +9,11 @@ import {
 	Pagination,
 	useMediaQuery,
 	TableContainer,
-	CircularProgress
+	CircularProgress,
 } from "@mui/material";
 import './../../shared/css/sweetAlert.css';
-import { useEffect, useMemo, useState, useId } from "react";
+import { useEffect, useState } from "react";
 import { Environment } from "../environment";
-import { useSearchParams } from "react-router-dom";
 import { listReloadEvent } from "../../shared/events/listReload";
 
 export type GetAllFunction<TData, TFilter = undefined> = (
@@ -25,7 +24,6 @@ export type GetAllFunction<TData, TFilter = undefined> = (
 
 interface PaginationProps<TData, TFilter = undefined> {
 	apiCall: GetAllFunction<TData, TFilter>;
-	eventName?: string;
 	itemsPerPage?: number;
 	filters?: TFilter;
 	minHeight?: number | string;
@@ -41,7 +39,6 @@ interface PaginationProps<TData, TFilter = undefined> {
 export function ListItems<TData, TFilter = undefined>({
 	apiCall,
 	id,
-	eventName = id,
 	CircularProgressSize = 13,
 	itemsPerPage = Environment.LIMITE_DE_LINHAS,
 	filters,
@@ -62,18 +59,16 @@ export function ListItems<TData, TFilter = undefined>({
 
 
 }: PaginationProps<TData, TFilter>) {
-	const uniqueId = id ?? useId();
 	const NUMBER_OF_SKELETONS = Array(itemsPerPage).fill(null);
 
 	const theme = useTheme();
 	const smDown = useMediaQuery(theme.breakpoints.down('sm'));
 
-	const [searchParams, setSearchParams] = useSearchParams();
 	const [rows, setRows] = useState<TData[]>([]);
 	const [totalCount, setTotalCount] = useState(0);
 	const [loading, setLoading] = useState(true);
 
-	const page = useMemo(() => Number(searchParams.get('page' + uniqueId) || '1'), [searchParams]);
+	const [page, setPage] = useState(1);
 
 	const list = async () => {
 		setLoading(true);
@@ -97,19 +92,13 @@ export function ListItems<TData, TFilter = undefined>({
 	}, [page, filters]);
 
 	useEffect(() => {
-		setSearchParams((old) => {
-			old.set("page" + uniqueId, "1");
-			return old;
-		});
+		setPage(1);
 	}, [filters]);
 
 	useEffect(() => {
 		const unsubscribe = listReloadEvent.on((target) => {
-			if (target == "*" || target == eventName) {
-				setSearchParams((old) => {
-					old.set("page" + uniqueId, "1");
-					return old;
-				});
+			if (target == "*" || target == id) {
+				setPage(1);
 				list();
 			}
 		});
@@ -152,10 +141,7 @@ export function ListItems<TData, TFilter = undefined>({
 						page={Number(page)}
 						count={Math.ceil(totalCount / itemsPerPage)}
 						onChange={(_, newPage) =>
-							setSearchParams((old) => {
-								old.set("page" + uniqueId, newPage.toString());
-								return old;
-							})
+							setPage(newPage)
 						}
 						siblingCount={smDown ? 0 : 1}
 						size={size}
