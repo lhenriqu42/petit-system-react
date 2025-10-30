@@ -8,11 +8,11 @@ import {
 	Button,
 	Alert,
 } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import CategoryIcon from '@mui/icons-material/Category';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import { LayoutMain } from "../../shared/layouts";
-// import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import { IProduct, ProductService, PackService } from "../../shared/services/api";
 import { GetAllFunction, ListItems } from "../../shared/components/ListItems";
 import { ModalButton } from "../../shared/components/ModalButton";
@@ -45,11 +45,18 @@ export const Packs: React.FC = () => {
 
 	const itemSelected = prodSelected || packSelected;
 
+	const getPacksByProdFilter = useMemo(() => {
+		return { prod_id: prodSelected?.id || 0 };
+	}, [prodSelected]);
 
 
+	useEffect(() => {
+		setProdSearch("");
+	}, [mode]);
 
-
-
+	const getProdsByPackFilters = useMemo(() => {
+		return { pack_id: packSelected?.id || 0, prodName: prodSearch };
+	}, [packSelected, prodSearch]);
 
 
 	// CRIAR UMA EMBALAGEM NOVA
@@ -119,10 +126,70 @@ export const Packs: React.FC = () => {
 				text: 'Relação realizada com sucesso!',
 				willClose: () => {
 					modalCloseEvent.emit("*");
+					listReloadEvent.emit('*');
+					setProdSearch("");
 				}
 			});
 		} catch (error) {
 			alert(error);
+		}
+	};
+
+
+
+
+
+
+
+
+
+
+
+
+	// REMOVER RELACIONAMENTO
+	useEffect(() => {
+		setRemoveSelected([]);
+	}, [prodSelected, packSelected, mode]);
+	const [removeSelected, setRemoveSelected] = useState<number[]>([]);
+	const handleRemoveRelationship = async () => {
+		if (removeSelected.length === 0) {
+			Swal.fire({
+				icon: 'warning',
+				title: 'Atenção',
+				text: 'Nenhum item selecionado.',
+			});
+			return;
+		}
+		const result = await Swal.fire({
+			title: 'Remover Relacionamento',
+			text: `Tem certeza que deseja remover o relacionamento entre os itens selecionados?`,
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Sim, remover',
+			cancelButtonText: 'Cancelar',
+		});
+		if (result.isConfirmed) {
+			try {
+				let response: Promise<void | Error>;
+				if (mode === "Produtos" && prodSelected) {
+					response = PackService.removePacksFromProd({ prod_id: prodSelected.id, packs: removeSelected });
+				} else if (mode === "Embalagens" && packSelected) {
+					response = PackService.removeProdsFromPack({ pack_id: packSelected.id, prods: removeSelected });
+				}
+				const res = await response!;
+				if (res instanceof Error) {
+					throw res;
+				}
+				Swal.fire({
+					icon: 'success',
+					title: 'Sucesso',
+					text: 'Relacionamento removido com sucesso!',
+				});
+				setRemoveSelected([]);
+				listReloadEvent.emit('*');
+			} catch (error) {
+				alert(error);
+			}
 		}
 	};
 
@@ -242,34 +309,38 @@ export const Packs: React.FC = () => {
 									<Box width={'100%'} height={'100%'} display={'flex'} flexDirection={'column'} justifyContent={'center'}>
 										<Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mb={2}>
 											<Typography variant="h5" color={prodSelected ? 'primary.main' : 'text.secondary'}>{prodSelected.name}</Typography>
-											<ModalButton
-												startIcon={<InventoryIcon />}
-												onClose={() => {
-													listReloadEvent.emit('packs-to-relate-modal');
-												}}
-												modalProps={{
-													submit: () => submitRelacionar('packs-to-relate-modal'),
-													submitButtonProps: { Text: 'Relacionar' },
-													title: 'Relacionar Embalagens',
-													ModalContent: (
-														<ModalRelacionar
-															mode="pack"
-															id="packs-to-relate-modal"
-															apiCall={PackService.getAll}
-															itemSelectedName={prodSelected.name}
-															onChange={(selected) => setRelacionarSelected([...selected].map(([id, _]) => id))}
-															filterId={prodSelected.id}
-														/>
-													),
-												}}
-											>
-												Relacionar Embalagens
-											</ModalButton>
+											<Box display="flex" gap={2}>
+												<Button variant="outlined" startIcon={<DeleteIcon />} color="error" onClick={handleRemoveRelationship}>Remover Relacionamento</Button>
+												<ModalButton
+													startIcon={<InventoryIcon />}
+													onClose={() => {
+														listReloadEvent.emit('packs-to-relate-modal');
+													}}
+													modalProps={{
+														submit: () => submitRelacionar('packs-to-relate-modal'),
+														submitButtonProps: { Text: 'Relacionar' },
+														title: 'Relacionar Embalagens',
+														ModalContent: (
+															<ModalRelacionar
+																mode="pack"
+																id="packs-to-relate-modal"
+																apiCall={PackService.getAll}
+																itemSelectedName={prodSelected.name}
+																onChange={(selected) => setRelacionarSelected([...selected].map(([id, _]) => id))}
+																filterId={prodSelected.id}
+															/>
+														),
+													}}
+												>
+													Relacionar Embalagens
+												</ModalButton>
+											</Box>
 										</Box>
 										<ListItems
 											id="packs-by-prod-list"
+											minHeight={575}
 											itemsPerPage={9}
-											filters={{ prod_id: prodSelected.id }}
+											filters={getPacksByProdFilter}
 											apiCall={PackService.getPacksByProd}
 											CustomTableRowHeader={() => (
 												<TableRow>
@@ -278,7 +349,18 @@ export const Packs: React.FC = () => {
 												</TableRow>
 											)}
 											CustomTableRow={({ row }) => (
-												<TableRow hover>
+												<TableRow
+													hover
+													sx={{ cursor: 'pointer' }}
+													selected={removeSelected.includes(row.id)}
+													onClick={() => {
+														setRemoveSelected((prev) => {
+															if (prev.includes(row.id)) {
+																return prev.filter(id => id !== row.id);
+															}
+															return [...prev, row.id];
+														});
+													}}>
 													<TableCell>{row.description}</TableCell>
 													<TableCell><Typography color="primary">{row.prod_qnt}</Typography></TableCell>
 												</TableRow>
@@ -290,34 +372,38 @@ export const Packs: React.FC = () => {
 									<Box width={'100%'} height={'100%'} display={'flex'} flexDirection={'column'} justifyContent={'center'}>
 										<Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mb={2}>
 											<Typography variant="h5" color={packSelected ? 'primary.main' : 'text.secondary'}>{packSelected.description}</Typography>
-											<ModalButton
-												startIcon={<CategoryIcon />}
-												onClose={() => {
-													listReloadEvent.emit('prods-to-relate-modal');
-												}}
-												modalProps={{
-													submit: () => submitRelacionar('prods-to-relate-modal'),
-													submitButtonProps: { Text: 'Relacionar' },
-													title: 'Relacionar Produtos',
-													ModalContent: (
-														<ModalRelacionar
-															mode="prod"
-															id="prods-to-relate-modal"
-															apiCall={PackService.getAllProducts}
-															itemSelectedName={packSelected.description}
-															onChange={(selected) => setRelacionarSelected([...selected].map(([id, _]) => id))}
-															filterId={packSelected.id}
-														/>
-													),
-												}}
-											>
-												Relacionar Produtos
-											</ModalButton>
+											<Box display="flex" gap={2}>
+												<Button variant="outlined" startIcon={<DeleteIcon />} color="error" onClick={handleRemoveRelationship}>Remover Relacionamento</Button>
+												<ModalButton
+													startIcon={<CategoryIcon />}
+													onClose={() => {
+														listReloadEvent.emit('prods-to-relate-modal');
+													}}
+													modalProps={{
+														submit: () => submitRelacionar('prods-to-relate-modal'),
+														submitButtonProps: { Text: 'Relacionar' },
+														title: 'Relacionar Produtos',
+														ModalContent: (
+															<ModalRelacionar
+																mode="prod"
+																id="prods-to-relate-modal"
+																apiCall={PackService.getAllProducts}
+																itemSelectedName={packSelected.description}
+																onChange={(selected) => setRelacionarSelected([...selected].map(([id, _]) => id))}
+																filterId={packSelected.id}
+															/>
+														),
+													}}
+												>
+													Relacionar Produtos
+												</ModalButton>
+											</Box>
 										</Box>
+										<TextField size="small" placeholder="Pesquisar" fullWidth value={prodSearch} onChange={(e) => setProdSearch(e.target.value)} margin="normal" />
 										<ListItems
 											id="prods-by-pack-list"
-											itemsPerPage={9}
-											filters={{ pack_id: packSelected.id }}
+											itemsPerPage={mode === "Produtos" ? 7 : 8}
+											filters={getProdsByPackFilters}
 											apiCall={PackService.getProdsByPack}
 											CustomTableRowHeader={() => (
 												<TableRow>
@@ -326,7 +412,18 @@ export const Packs: React.FC = () => {
 												</TableRow>
 											)}
 											CustomTableRow={({ row }) => (
-												<TableRow hover>
+												<TableRow
+													hover
+													sx={{ cursor: 'pointer' }}
+													selected={removeSelected.includes(row.id)}
+													onClick={() => {
+														setRemoveSelected((prev) => {
+															if (prev.includes(row.id)) {
+																return prev.filter(id => id !== row.id);
+															}
+															return [...prev, row.id];
+														});
+													}}>
 													<TableCell>{row.code}</TableCell>
 													<TableCell>{row.name}</TableCell>
 												</TableRow>

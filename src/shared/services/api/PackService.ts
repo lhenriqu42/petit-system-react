@@ -72,7 +72,7 @@ const getAll = async (page = 1, limit = Environment.LIMITE_DE_LINHAS, filter?: {
 	}
 };
 
-const getAllProducts = async (page = 1, limit = Environment.LIMITE_DE_LINHAS, filter?: {id?: number, prodName?: string}): Promise<{ data: IProduct[]; totalCount: number } | Error> => {
+const getAllProducts = async (page = 1, limit = Environment.LIMITE_DE_LINHAS, filter?: { id?: number, prodName?: string }): Promise<{ data: IProduct[]; totalCount: number } | Error> => {
 	try {
 		const excludeParam = filter?.id ? { excludePackId: filter.id } : {};
 		const prodNameParam = filter?.prodName ? { prodName: filter.prodName } : {};
@@ -84,7 +84,6 @@ const getAllProducts = async (page = 1, limit = Environment.LIMITE_DE_LINHAS, fi
 				totalCount: Number(headers['x-total-count'] || Environment.LIMITE_DE_LINHAS),
 			};
 		}
-
 		return new Error('Erro ao listar os registros.');
 	} catch (error) {
 		console.error(error);
@@ -113,17 +112,18 @@ const getPacksByProd = async (page = 1, limit = Environment.LIMITE_DE_LINHAS, fi
 	}
 };
 
-const getProdsByPack = async (page = 1, limit = Environment.LIMITE_DE_LINHAS, filter?: { pack_id: number }): Promise<{ data: IProduct[]; totalCount: number } | Error> => {
+const getProdsByPack = async (page = 1, limit = Environment.LIMITE_DE_LINHAS, filter?: { pack_id: number, prodName?: string }): Promise<{ data: IProduct[]; totalCount: number } | Error> => {
 	if (!filter || !filter.pack_id) {
 		return new Error('Parâmetro "pack_id" é obrigatório.');
 	}
+	const prodNameParam = filter.prodName ? { prodName: filter.prodName } : {};
 	try {
-		const urlRelativa = urlBuilder(`/pack/getProds/${filter.pack_id}`, { page, limit });
-		const { data } = await Api.get(urlRelativa, Autorization());
+		const urlRelativa = urlBuilder(`/pack/getProds/${filter.pack_id}`, { page, limit, ...prodNameParam });
+		const { data, headers } = await Api.get(urlRelativa, Autorization());
 		if (data) {
 			return {
 				data: data,
-				totalCount: data.length
+				totalCount: Number(headers['x-total-count'] || Environment.LIMITE_DE_LINHAS),
 			};
 		}
 
@@ -134,7 +134,7 @@ const getProdsByPack = async (page = 1, limit = Environment.LIMITE_DE_LINHAS, fi
 	}
 };
 
-const putProdsInPack = async ({pack_id, prods}: {pack_id: number, prods: number[]}): Promise<void | Error> => {
+const putProdsInPack = async ({ pack_id, prods }: { pack_id: number, prods: number[] }): Promise<void | Error> => {
 	try {
 		await Api.post(`/pack/putProds/${pack_id}`, { prods }, Autorization());
 	} catch (error) {
@@ -143,7 +143,7 @@ const putProdsInPack = async ({pack_id, prods}: {pack_id: number, prods: number[
 	}
 };
 
-const putPacksInProd = async ({prod_id, packs}: {prod_id: number, packs: number[]}): Promise<void | Error> => {
+const putPacksInProd = async ({ prod_id, packs }: { prod_id: number, packs: number[] }): Promise<void | Error> => {
 	try {
 		await Api.post(`/pack/putPacks/${prod_id}`, { packs }, Autorization());
 	} catch (error) {
@@ -152,6 +152,24 @@ const putPacksInProd = async ({prod_id, packs}: {prod_id: number, packs: number[
 	}
 };
 
+const removeProdsFromPack = async ({ pack_id, prods }: { pack_id: number, prods: number[] }): Promise<void | Error> => {
+	try {
+		await Api.delete(`/pack/removeProds/${pack_id}`, { data: { prods }, ...Autorization() });
+	} catch (error) {
+		console.error(error);
+		return new Error((error as { message: string }).message || 'Erro ao remover os produtos da embalagem.');
+	}
+}
+
+const removePacksFromProd = async ({ prod_id, packs }: { prod_id: number, packs: number[] }): Promise<void | Error> => {
+	try {
+		await Api.delete(`/pack/removePacks/${prod_id}`, { data: { packs }, ...Autorization() });
+	} catch (error) {
+		console.error(error);
+		return new Error((error as { message: string }).message || 'Erro ao remover as embalagens do produto.');
+	}
+}
+
 export const PackService = {
 	create,
 	getAll,
@@ -159,5 +177,7 @@ export const PackService = {
 	getPacksByProd,
 	putProdsInPack,
 	putPacksInProd,
+	removeProdsFromPack,
+	removePacksFromProd,
 	getAllProducts,
 };
