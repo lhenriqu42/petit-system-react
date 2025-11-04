@@ -24,7 +24,7 @@ interface IVSelectProps {
 	minWidth?: number,
 	maxWidth?: number,
 	defaultSelected?: number,
-	onValueChange?: (selectedValue: string) => void;
+	onValueChange?: (selectedValue: string, pack_index: number) => void;
 	m?: number,
 	mx?: number,
 	my?: number,
@@ -44,12 +44,15 @@ export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaul
 
 	const handleChange = (event: SelectChangeEvent) => {
 		setValue(event.target.value as string);
-		onValueChange?.(event.target.value);
+		onValueChange?.(event.target.value, menuItens.findIndex(item => item.value === event.target.value));
 	};
 
 	useEffect(() => {
 		if (required) {
-			if (value) setBorderColor(undefined)
+			if (value) {
+				if (value === '0') setBorderColor({ normal: '#d32f2f', hover: '#d32f2f', focused: '#d32f2f' });
+				else setBorderColor(undefined);
+			}
 			else setBorderColor({ normal: '#d32f2f', hover: '#d32f2f', focused: '#d32f2f' });
 		}
 	}, [value]);

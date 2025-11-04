@@ -10,6 +10,7 @@ import {
 	useMediaQuery,
 	TableContainer,
 	CircularProgress,
+	SxProps,
 } from "@mui/material";
 import './../../shared/css/sweetAlert.css';
 import { useEffect, useState } from "react";
@@ -34,11 +35,13 @@ interface PaginationProps<TData, TFilter = undefined> {
 	CircularProgressSize?: number;
 	size?: "small" | "medium" | "large";
 	id?: string;
+	pagSx?: SxProps;
 }
 
 export function ListItems<TData, TFilter = undefined>({
 	apiCall,
 	id,
+	pagSx,
 	CircularProgressSize = 13,
 	itemsPerPage = Environment.LIMITE_DE_LINHAS,
 	filters,
@@ -134,7 +137,7 @@ export function ListItems<TData, TFilter = undefined>({
 					</Table>
 				</TableContainer>
 			</Box>
-			<Box height={32} display={'flex'} alignItems={'center'}>
+			<Box height={32} display={'flex'} alignItems={'center'} sx={pagSx}>
 				{(totalCount > 0 && totalCount > itemsPerPage) && (
 					<Pagination
 						disabled={loading}

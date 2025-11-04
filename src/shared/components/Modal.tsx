@@ -10,6 +10,9 @@ interface IButtonProps {
 }
 
 export interface IModalProps {
+	p?: number;
+	py?: number;
+	px?: number;
 	open: boolean;
 	onClose: () => void;
 	title: string;
@@ -23,6 +26,9 @@ export interface IModalProps {
 }
 
 export const Modal: React.FC<IModalProps> = ({
+	p,
+	py = 3,
+	px = 1,
 	open,
 	submit,
 	onClose,
@@ -74,7 +80,7 @@ export const Modal: React.FC<IModalProps> = ({
 		>
 			<DialogTitle>{title}</DialogTitle>
 			<DialogContent>
-				<Box py={3} px={1}>
+				<Box py={py} px={px} p={p}>
 					<Typography component="div">
 						{ModalContent}
 					</Typography>
