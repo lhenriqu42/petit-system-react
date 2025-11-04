@@ -16,6 +16,7 @@ import './../../shared/css/sweetAlert.css';
 import { useEffect, useState } from "react";
 import { Environment } from "../environment";
 import { listReloadEvent } from "../../shared/events/listReload";
+import { useDeepEffect } from '../../shared/hooks/UseDeepEffect';
 
 export type GetAllFunction<TData, TFilter = undefined> = (
 	page?: number,
@@ -73,10 +74,10 @@ export function ListItems<TData, TFilter = undefined>({
 
 	const [page, setPage] = useState(1);
 
-	const list = async () => {
+	const list = async (pageArg = page, filtersArg = filters) => {
 		setLoading(true);
 		try {
-			const result = await apiCall(page, itemsPerPage, filters);
+			const result = await apiCall(pageArg, itemsPerPage, filtersArg);
 			if (result instanceof Error) {
 				alert(result.message);
 			} else {
@@ -90,23 +91,24 @@ export function ListItems<TData, TFilter = undefined>({
 		}
 	};
 
-	useEffect(() => {
-		list();
+
+	useDeepEffect(() => {
+		list(page, filters);
 	}, [page, filters]);
 
-	useEffect(() => {
+	useDeepEffect(() => {
 		setPage(1);
 	}, [filters]);
 
-	useEffect(() => {
+	useDeepEffect(() => {
 		const unsubscribe = listReloadEvent.on((target) => {
 			if (target == "*" || target == id) {
 				setPage(1);
-				list();
+				list(1, filters);
 			}
 		});
 		return unsubscribe; // remove listener ao desmontar
-	}, []);
+	}, [filters]);
 
 	return (
 		<Box height={height} display={'flex'} flexDirection={'column'} justifyContent={'space-between'}>

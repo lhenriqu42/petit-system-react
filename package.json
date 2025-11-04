@@ -30,6 +30,7 @@
         "react-router-dom": "^6.26.2",
         "sort-by": "^1.2.0",
         "sweetalert2": "^11.14.1",
+        "use-deep-compare-effect": "^1.8.1",
         "yup": "^1.4.0"
     },
     "devDependencies": {

@@ -45,18 +45,9 @@ export const Packs: React.FC = () => {
 
 	const itemSelected = prodSelected || packSelected;
 
-	const getPacksByProdFilter = useMemo(() => {
-		return { prod_id: prodSelected?.id || 0 };
-	}, [prodSelected]);
-
-
 	useEffect(() => {
 		setProdSearch("");
 	}, [mode]);
-
-	const getProdsByPackFilters = useMemo(() => {
-		return { pack_id: packSelected?.id || 0, prodName: prodSearch };
-	}, [packSelected, prodSearch]);
 
 
 	// CRIAR UMA EMBALAGEM NOVA
@@ -340,7 +331,7 @@ export const Packs: React.FC = () => {
 											id="packs-by-prod-list"
 											minHeight={575}
 											itemsPerPage={9}
-											filters={getPacksByProdFilter}
+											filters={{ prod_id: prodSelected.id}}
 											apiCall={PackService.getPacksByProd}
 											CustomTableRowHeader={() => (
 												<TableRow>
@@ -403,7 +394,7 @@ export const Packs: React.FC = () => {
 										<ListItems
 											id="prods-by-pack-list"
 											itemsPerPage={mode === "Produtos" ? 7 : 8}
-											filters={getProdsByPackFilters}
+											filters={{ pack_id: packSelected.id, prodName: prodSearch }}
 											apiCall={PackService.getProdsByPack}
 											CustomTableRowHeader={() => (
 												<TableRow>
