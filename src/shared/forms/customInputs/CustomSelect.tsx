@@ -24,7 +24,7 @@ interface IVSelectProps {
 	minWidth?: number,
 	maxWidth?: number,
 	defaultSelected?: number,
-	onValueChange?: (selectedValue: string, pack_index: number) => void;
+	onValueChange?: (selectedValue: string) => void;
 	m?: number,
 	mx?: number,
 	my?: number,
@@ -35,17 +35,26 @@ interface IVSelectProps {
 	size?: 'small' | 'medium';
 	required?: boolean;
 	borderColor?: IBorderColor;
+	disabled?: boolean;
 }
 
-export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaultSelected, helperText, minWidth, onValueChange, m, mx, my, mt, p, px, py, maxWidth, size = 'medium', required }) => {
+export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaultSelected, helperText, minWidth, onValueChange, m, mx, my, mt, p, px, py, maxWidth, size = 'medium', required, disabled }) => {
 
-	const [value, setValue] = useState(defaultSelected !== undefined ? menuItens[defaultSelected].value : '');
+	const [value, setValue] = useState('');
 	const [borderColor, setBorderColor] = useState<IBorderColor>();
 
 	const handleChange = (event: SelectChangeEvent) => {
 		setValue(event.target.value as string);
-		onValueChange?.(event.target.value, menuItens.findIndex(item => item.value === event.target.value));
+		onValueChange?.(event.target.value);
 	};
+
+	useEffect(() => {
+		if (defaultSelected !== undefined) {
+			if (defaultSelected >= 0 && defaultSelected < menuItens.length) {
+				setValue(menuItens[defaultSelected].value);
+			}
+		}
+	}, [defaultSelected, menuItens]);
 
 	useEffect(() => {
 		if (required) {
@@ -62,6 +71,7 @@ export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaul
 			<FormControl fullWidth>
 				<InputLabel id="demo-simple-select-label" size={size == 'small' ? 'small' : 'normal'} color={borderColor && 'error'}>{label}</InputLabel>
 				<Select
+					disabled={disabled}
 					sx={{
 						'& .MuiOutlinedInput-notchedOutline': {
 							borderColor: borderColor?.normal,

@@ -7,9 +7,10 @@ import {
 	Pagination,
 	useMediaQuery,
 	TableContainer,
+	SxProps,
 } from "@mui/material";
 import './../../shared/css/sweetAlert.css';
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Environment } from "../environment";
 import { listReloadEvent } from "../../shared/events/listReload";
 
@@ -24,11 +25,14 @@ interface PaginationProps<TData> {
 	CustomTableRowHeader?: React.FC;
 	size?: "small" | "medium" | "large";
 	id?: string;
+	pagSx?: SxProps;
+
 }
 
 export function ListArray<TData>({
 	id,
 	items,
+	pagSx,
 	itemsPerPage = Environment.LIMITE_DE_LINHAS,
 	customPlaceHolder = "Nenhum dado encontrado.",
 	minHeight,
@@ -47,37 +51,38 @@ export function ListArray<TData>({
 
 	const [page, setPage] = useState(1);
 
-	const list = async () => {
+	const [reloadKey, setReloadKey] = useState(0);
+
+	const list = useCallback(() => {
 		const startIndex = (page - 1) * itemsPerPage;
 		const endIndex = startIndex + itemsPerPage;
-		// console.log(items);
+
 		const result = {
 			data: items.slice(startIndex, endIndex),
-			totalCount: items.length
+			totalCount: items.length,
 		};
+
 		if (result.data.length === 0 && result.totalCount > 0) {
-			setPage(() => {
-				const lastPage = Math.ceil(result.totalCount / itemsPerPage);
-				return lastPage;
-			});
+			setPage(() => Math.ceil(result.totalCount / itemsPerPage));
 			return;
 		}
 		setRows(result.data);
 		setTotalCount(result.totalCount);
-	};
+	}, [items, page, itemsPerPage, reloadKey]);
 
 	useEffect(() => {
 		list();
-	}, [page, items]);
+	}, [list]);
 
 	useEffect(() => {
 		const unsubscribe = listReloadEvent.on((target) => {
-			if (target == "*" || target == id) {
-				list();
+			if (target === "*" || target === id) {
+				setReloadKey((old) => old + 1);
 			}
 		});
-		return unsubscribe; // remove listener ao desmontar
-	}, []);
+		return unsubscribe;
+	}, [id, list]);
+
 
 	return (
 		<Box height={height} display={'flex'} flexDirection={'column'} justifyContent={'space-between'}>
@@ -88,12 +93,14 @@ export function ListArray<TData>({
 							{CustomTableRowHeader && <CustomTableRowHeader />}
 						</TableHead>
 
-						<TableBody>
+						<TableBody key={reloadKey}>
 							{
 								rows?.map(
-									(row) => (
-										<CustomTableRow key={JSON.stringify(row)} row={row} />
-									)
+									(row) => {
+										return (
+											<CustomTableRow key={JSON.stringify(row)} row={row} />
+										)
+									}
 								)
 							}
 						</TableBody>
@@ -104,7 +111,7 @@ export function ListArray<TData>({
 					</Table>
 				</TableContainer>
 			</Box>
-			<Box height={32} display={'flex'} alignItems={'center'}>
+			<Box height={32} display={'flex'} alignItems={'center'} sx={pagSx}>
 				{(totalCount > 0 && totalCount > itemsPerPage) && (
 					<Pagination
 						page={Number(page)}
