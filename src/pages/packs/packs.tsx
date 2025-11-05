@@ -441,7 +441,7 @@ interface ModalRelacionarProps<TData, TFilter = undefined> {
 	itemSelectedName: string;
 	mode: 'prod' | 'pack';
 }
-function ModalRelacionar<TData, TFilter = undefined>({ apiCall, itemSelectedName, onChange, filterId, id, mode }: ModalRelacionarProps<TData, TFilter>) {
+export function ModalRelacionar<TData, TFilter = undefined>({ apiCall, itemSelectedName, onChange, filterId, id, mode }: ModalRelacionarProps<TData, TFilter>) {
 
 	const [selected, setSelected] = useState<Map<number, string>>(new Map());
 
