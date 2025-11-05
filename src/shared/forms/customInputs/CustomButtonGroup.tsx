@@ -23,7 +23,8 @@ export const CustomButtonGroup: React.FC<ICustomButtonGroupProps> = ({
 	onChange,
 	selected,
 }) => {
-	const [selectedButton, setSelectedButton] = useState<{ label: string, index: number } | null>(selected ? { label: selected.label, index: buttons.findIndex(btn => btn.label === selected.label) } : null);
+	const item = selected ? { label: selected.label, index: buttons.findIndex(btn => btn.label === selected.label) } : null;
+	const [selectedButton, setSelectedButton] = useState<{ label: string, index: number } | null>(item || (buttons.length > 0 ? { label: buttons[0].label, index: 0 } : null));
 	const handleChange = (selectedParam: { label: string, index: number } | null) => {
 		if (selected?.label === selectedParam?.label) return;
 		setSelectedButton(selectedParam);
