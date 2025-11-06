@@ -94,16 +94,15 @@ export function ListArray<TData>({
 						</TableHead>
 
 						<TableBody key={reloadKey}>
-							{
-								rows?.map(
-									(row) => {
-										return (
-											<CustomTableRow key={JSON.stringify(row)} row={row} />
-										)
-									}
-								)
-							}
+							{rows?.map((row, index) => {
+								const key =
+									(row as any)?.id ??
+									(row as any)?.prod_id ??
+									index; // fallback, mas evite depender do índice
+								return <CustomTableRow key={key} row={row} />;
+							})}
 						</TableBody>
+
 
 						{totalCount === 0 && (
 							<caption>{customPlaceHolder}</caption>
