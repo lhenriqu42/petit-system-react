@@ -3,6 +3,7 @@ import {
 	TableRow,
 	TableCell,
 	Typography,
+	Button,
 } from "@mui/material";
 import { ListItems } from "../../../shared/components";
 import { nToBRL } from "../../../shared/services/formatters";
@@ -11,7 +12,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { CustomTextField } from "../../../shared/forms/customInputs/CustomTextField";
 import { ISupplier, ProductService, SupplierService } from "../../../shared/services/api";
 import { CustomAutoComplete } from "../../../shared/forms/customInputs/CustomAutoComplete";
+import BackspaceIcon from '@mui/icons-material/Backspace';
 import { CustomRow } from "./CustomRow";
+import Swal from "sweetalert2";
 
 export interface ISelectedItem {
 	prod_id: number;
@@ -50,16 +53,9 @@ export const CreateModalContent: React.FC = () => {
 	}, []);
 
 
-
-
-
-
-
-
-
 	// SELECTED ITEMS
 	const [prodSearch, setProdSearch] = useState("");
-	const [selected, setSelected] = useState<ISelectedItem[]>([]);
+	const [selected, setSelected] = useState<ISelectedItem[]>(cachedItems());
 	const toggleSelect = (item: ISelectedItem) => {
 		setSelected((prev) => {
 			const exists = prev.find((i) => i.prod_id === item.prod_id);
@@ -72,9 +68,66 @@ export const CreateModalContent: React.FC = () => {
 	};
 
 
+	// CACHED ITEMS
+	function cachedItems(): ISelectedItem[] {
+		const cached = localStorage.getItem('purchase_create_selected_items');
+		if (cached) {
+			try {
+				const parsed: ISelectedItem[] = JSON.parse(cached);
+				return parsed;
+			} catch {
+				return [];
+			}
+		}
+		return [];
+	};
+	useEffect(() => {
+		localStorage.setItem('purchase_create_selected_items', JSON.stringify(selected));
+	}, [selected]);
+
+	// CLEAR SELECTED
+	const clearSelected = async () => {
+		let timerInterval: number;
+		const response = await Swal.fire({
+			title: 'Tem certeza?',
+			text: 'Isso irá remover todos os itens selecionados.',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			confirmButtonText: 'Sim, limpar tudo!',
+			cancelButtonText: 'Cancelar',
+			didOpen: () => {
+				const confirmButton = Swal.getConfirmButton();
+				if (confirmButton) {
+					confirmButton.disabled = true; // Desabilita o botão inicialmente
+
+					let timeLeft = 3;
+					confirmButton.textContent = `Prosseguir (${timeLeft})`;
+
+					timerInterval = window.setInterval(() => {
+						timeLeft--;
+						confirmButton.textContent = `Prosseguir (${timeLeft})`;
+
+						if (timeLeft === 0) {
+							clearInterval(timerInterval);
+							confirmButton.textContent = 'Prosseguir';
+							confirmButton.disabled = false; // Habilita o botão após o timer
+						}
+					}, 1000);
+				}
+			},
+			willClose: () => {
+				clearInterval(timerInterval); // Limpa o intervalo quando o modal fechar
+			}
+		})
+		if (!response.isConfirmed) return;
+		setSelected([]);
+	};
 
 
 
+
+	// UPDATE SELECTED DATA
 	const updateSelectedData = useCallback(<K extends keyof ISelectedItemData>(prod_id: number, key: K, value: ISelectedItemData[K]) => {
 		setSelected((prev) => {
 			const next = prev.map((item) => {
@@ -164,7 +217,15 @@ export const CreateModalContent: React.FC = () => {
 						/>
 					</Box>
 					<Box display="flex" flexDirection="column" gap={0.5} border={2} borderColor={'#555'} px={2} py={0} borderRadius={2} width={'100%'}>
-						<Typography variant="subtitle1" mt={0.5}>Itens Selecionados:</Typography>
+						<Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mt={0.5} pr={3}>
+							<Typography variant="subtitle1" mt={0.5}>Itens Selecionados:</Typography>
+							<Button
+								size="small"
+								variant="contained"
+								color="error"
+								onClick={() => clearSelected()}
+								startIcon={<BackspaceIcon />}>Limpar Tudo</Button>
+						</Box>
 						<Box border={1} borderColor={'#77f'} borderRadius={2} height={'100%'} pb={1} mb={1.5} sx={{ backgroundColor: '#fafafe' }}>
 							<ListArray
 								id='array-selected-items'

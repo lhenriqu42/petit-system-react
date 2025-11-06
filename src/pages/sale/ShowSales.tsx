@@ -123,7 +123,7 @@ export const ShowSales: React.FC = () => {
 				if (confirmButton) {
 					confirmButton.disabled = true; // Desabilita o botão inicialmente
 
-					let timeLeft = 7;
+					let timeLeft = 5;
 					confirmButton.textContent = `Prosseguir (${timeLeft})`;
 
 					// Timer de 5 segundos
