@@ -29,7 +29,7 @@ interface CustomRowProps {
 
 export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, pack_id, updateSelectedData }: CustomRowProps) {
 
-	const [packs, setPacks] = useState<{ text: string; value: string }[]>([{ text: 'Carregando...', value: '0' }]);
+	const [packs, setPacks] = useState<{ text: string; value: string }[]>([{ text: 'Carregando...', value: '' }]);
 	const [loading, setLoading] = useState(true);
 	useEffect(() => {
 		const fetchPacks = async () => {
@@ -41,8 +41,9 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 				return;
 			}
 			if (packsResult.data.length === 0) {
-				setPacks([{ text: 'Nenhuma embalagem encontrada', value: '0' }]);
+				setPacks([{ text: 'Nenhuma embalagem encontrada', value: '' }]);
 			} else {
+				updateSelectedData(row.prod_id, 'pack_id', Number(packsResult.data[0].id));
 				setPacks(packsResult.data.map((pack) => ({ text: pack.description.slice(14), value: String(pack.id) })));
 			}
 			setLoading(false);
@@ -186,9 +187,9 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 					size="small"
 					type="number"
 					label="Quantidade"
-					value={quantity}
+					value={quantity ?? ''}
 					onChange={(e) =>
-						updateSelectedData(row.prod_id, 'quantity', Number(e.target.value))
+						updateSelectedData(row.prod_id, 'quantity', Number(e.target.value.replace(/-/g, '')))
 					}
 				/>
 			</TableCell>
@@ -196,8 +197,8 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 			<TableCell width={100}>
 				<TextField
 					size="small"
-					label="Preço"
-					value={price}
+					label="Preço Unitário"
+					value={price || nToBRL(0)}
 					onChange={(e) =>
 						updateSelectedData(row.prod_id, 'price', handleCashChange(e.target.value))
 					}

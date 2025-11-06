@@ -1,12 +1,12 @@
 import {
 	Box,
+	Button,
 	TableRow,
 	TableCell,
 	Typography,
-	Button,
 } from "@mui/material";
 import { ListItems } from "../../../shared/components";
-import { nToBRL } from "../../../shared/services/formatters";
+import { BRLToN, nToBRL } from "../../../shared/services/formatters";
 import { ListArray } from "../../../shared/components/ListArray";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CustomTextField } from "../../../shared/forms/customInputs/CustomTextField";
@@ -15,6 +15,10 @@ import { CustomAutoComplete } from "../../../shared/forms/customInputs/CustomAut
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import { CustomRow } from "./CustomRow";
 import Swal from "sweetalert2";
+import { ICreateBody, PurchaseService } from "../../../shared/services/api/PurchaseService";
+import { submitFormEvent } from "../../../shared/events/formEvents";
+import { listReloadEvent } from "../../../shared/events/listReload";
+import { modalCloseEvent } from "../../../shared/events/modalEvents";
 
 export interface ISelectedItem {
 	prod_id: number;
@@ -94,14 +98,13 @@ export const CreateModalContent: React.FC = () => {
 			icon: 'warning',
 			showCancelButton: true,
 			confirmButtonColor: '#d33',
-			confirmButtonText: 'Sim, limpar tudo!',
 			cancelButtonText: 'Cancelar',
 			didOpen: () => {
 				const confirmButton = Swal.getConfirmButton();
 				if (confirmButton) {
 					confirmButton.disabled = true; // Desabilita o botão inicialmente
 
-					let timeLeft = 3;
+					let timeLeft = 2;
 					confirmButton.textContent = `Prosseguir (${timeLeft})`;
 
 					timerInterval = window.setInterval(() => {
@@ -146,7 +149,7 @@ export const CreateModalContent: React.FC = () => {
 	const renderRow = useCallback(
 		({ row }: { row: ISelectedItem }) => {
 			const selected = selectedRef.current.find((i) => i.prod_id === row.prod_id);
-			console.log('Rendering row for prod_id:', row.prod_id, 'with selected data:', selected);
+			// console.log('Rendering row for prod_id:', row.prod_id, 'with selected data:', selected);
 			return (
 				<CustomRow
 					row={row}
@@ -160,6 +163,82 @@ export const CreateModalContent: React.FC = () => {
 		},
 		[updateSelectedData]
 	);
+
+
+
+	/*	SwalErrorf printa um alerta de erro formatado.
+		ex: SwalErrorf('Erro ao processar o item %b com valor %s.', 'Item1', 100);
+		%b -> negrito
+		%s -> string normal                
+	*/
+	const SwalErrorf = (message: string, ...args: any[]) => {
+		let i = 0;
+		const formatted = message.replace(/%[sb]/g, (match) => {
+			const arg = args[i++] ?? '';
+			return match === '%b' ? `<b>${String(arg)}</b>` : String(arg);
+		});
+
+		Swal.fire({
+			icon: 'error',
+			title: 'Erro',
+			html: formatted,
+		});
+	};
+
+	const submit = async () => {
+		if (!supplierSelected?.id || supplierSelected.id === -1) {
+			SwalErrorf('Selecione um fornecedor.');
+			return;
+		}
+
+		if (selected.length === 0) {
+			SwalErrorf('Selecione pelo menos um produto.');
+			return;
+		}
+
+		for (const item of selected) {
+			if (item.data.quantity <= 0) {
+				SwalErrorf(`A quantidade do produto %b deve ser maior que 0.`, item.prod_name);
+				return;
+			}
+			if (item.data.mode === 'PACK' && !item.data.pack_id) {
+				SwalErrorf(`Selecione uma embalagem para o produto: %b.`, item.prod_name);
+				return;
+			}
+		}
+
+		const body: ICreateBody = {
+			supplier_id: supplierSelected.id,
+			purchases: selected.map(item => ({
+				type: item.data.mode,
+				prod_id: item.prod_id,
+				pack_id: item.data.pack_id,
+				quantity: item.data.quantity,
+				price: BRLToN(item.data.price)
+			}))
+		};
+		console.log('Submitting purchase with body:', body);
+		const result = await PurchaseService.create(body);
+		if (result instanceof Error) {
+			SwalErrorf(result.message);
+		} else {
+			Swal.fire({
+				icon: 'success',
+				title: 'Sucesso',
+				text: 'Compra criada com sucesso.',
+				willClose: () => {
+					modalCloseEvent.emit('purchase_create_modal');
+					listReloadEvent.emit('purchase_list');
+					setSelected([]);
+				}
+			});
+		}
+	}
+	// SUBMIT EVENT
+	useEffect(() => {
+		const unsubscribe = submitFormEvent.on((target) => target === 'purchase_create' && submit());
+		return unsubscribe;
+	}, [supplierSelected, selected]);
 
 	return (
 		<Box>

@@ -20,6 +20,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import { ListItems } from "../../shared/components/ListItems";
 import { ModalButton } from "../../shared/components/ModalButton";
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+import { submitFormEvent } from "../../shared/events/formEvents";
 
 
 export const PurchasesList: React.FC = () => {
@@ -32,10 +33,11 @@ export const PurchasesList: React.FC = () => {
 					<Box display={'flex'} justifyContent={'space-between'}>
 						<ModalButton
 							modalProps={{
+								id: 'purchase_create_modal',
 								p: 0,
 								title: "Novo Pedido",
 								maxWidth: 'xl',
-								submit: async () => { },
+								submit: async () => { submitFormEvent.emit('purchase_create') },
 								submitButtonProps: { Text: "Salvar" },
 								ModalContent:
 									<CreateModalContent />,
@@ -66,6 +68,7 @@ export const PurchasesList: React.FC = () => {
 				</Paper>
 				<Paper variant="elevation" sx={{ backgroundColor: '#fff', mr: 4, px: 3, py: 1, mt: 1, width: 'auto', pb: 2 }} >
 					<ListItems
+						id="purchase_list"
 						height={670}
 						apiCall={PurchaseService.getAll}
 						CustomTableRowHeader={() => (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import Box from '@mui/material/Box';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -39,7 +39,7 @@ interface IVSelectProps {
 }
 
 export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaultSelected, helperText, minWidth, onValueChange, m, mx, my, mt, p, px, py, maxWidth, size = 'medium', required, disabled }) => {
-
+	const uniqueId = useId();
 	const [value, setValue] = useState('');
 	const [borderColor, setBorderColor] = useState<IBorderColor>();
 
@@ -59,7 +59,7 @@ export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaul
 	useEffect(() => {
 		if (required) {
 			if (value) {
-				if (value === '0') setBorderColor({ normal: '#d32f2f', hover: '#d32f2f', focused: '#d32f2f' });
+				if (value === '') setBorderColor({ normal: '#d32f2f', hover: '#d32f2f', focused: '#d32f2f' });
 				else setBorderColor(undefined);
 			}
 			else setBorderColor({ normal: '#d32f2f', hover: '#d32f2f', focused: '#d32f2f' });
@@ -69,7 +69,7 @@ export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaul
 	return (
 		<Box sx={{ minWidth, m, mx, my, mt, p, px, py, maxWidth }}>
 			<FormControl fullWidth>
-				<InputLabel id="demo-simple-select-label" size={size == 'small' ? 'small' : 'normal'} color={borderColor && 'error'}>{label}</InputLabel>
+				<InputLabel id={`${uniqueId}-label`} size={size == 'small' ? 'small' : 'normal'} color={borderColor && 'error'}>{label}</InputLabel>
 				<Select
 					disabled={disabled}
 					sx={{
@@ -94,8 +94,8 @@ export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaul
 							}
 						}
 					}}
-					labelId="demo-simple-select-label"
-					id="demo-simple-select"
+					labelId={`${uniqueId}-label`}
+					id={`${uniqueId}-select`}
 					value={value}
 					label={label}
 					onChange={handleChange}

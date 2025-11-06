@@ -10,6 +10,7 @@ interface IButtonProps {
 }
 
 export interface IModalProps {
+	id?: string;
 	p?: number;
 	py?: number;
 	px?: number;
@@ -39,6 +40,7 @@ export const Modal: React.FC<IModalProps> = ({
 	submitButtonProps,
 	ModalContent,
 	maxWidth = 'lg',
+	id = title,
 }) => {
 	const [loading, setLoading] = useState(false);
 
@@ -61,12 +63,12 @@ export const Modal: React.FC<IModalProps> = ({
 
 	useEffect(() => {
 		const unsubscribe = modalCloseEvent.on((target) => {
-			if (target == "*" || target == title) {
+			if (target == "*" || target == id) {
 				handleClose();
 			}
 		});
 		return unsubscribe; // remove listener ao desmontar
-	}, []);
+	}, [id]);
 
 	return (
 		<Dialog

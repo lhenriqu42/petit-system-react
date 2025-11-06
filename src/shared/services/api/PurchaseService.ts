@@ -10,9 +10,16 @@ const Autorization = () => {
 	}
 }
 
+
 export interface ICreateBody {
 	supplier_id: number;
-	prods: { prod_id: number, quantity: number, price: number }[];
+	purchases: {
+		type: 'PACK' | 'PRODUCT';
+		prod_id: number;
+		pack_id?: number;			// only if type is PACK
+		quantity: number;
+		price: number;
+	}[];
 }
 
 export interface IGetAllResponse {
@@ -29,6 +36,13 @@ export interface IGetAllResponse {
 
 
 const create = async (body: ICreateBody): Promise<number | Error> => {
+	body.purchases = body.purchases.map((item) => {
+		const pack_id = item.type === 'PACK' ? item.pack_id : undefined;
+		return {
+			...item,
+			pack_id,
+		};
+	});
 	try {
 		const { data } = await Api.post('/purchase', body, Autorization());
 
