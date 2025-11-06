@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { Link } from "react-router-dom";
 import AddIcon from '@mui/icons-material/Add';
 import CodeIcon from '@mui/icons-material/Code';
+import BlockIcon from '@mui/icons-material/Block';
 import { LayoutMain } from "../../shared/layouts";
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import { nToBRL } from "../../shared/services/formatters";
@@ -18,9 +19,10 @@ import { CreateModalContent } from "./Create/ModalCreate";
 import { PurchaseService } from "../../shared/services/api";
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { ListItems } from "../../shared/components/ListItems";
+import { submitFormEvent } from "../../shared/events/formEvents";
 import { ModalButton } from "../../shared/components/ModalButton";
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
-import { submitFormEvent } from "../../shared/events/formEvents";
+import { width } from "@mui/system";
 
 
 export const PurchasesList: React.FC = () => {
@@ -78,6 +80,7 @@ export const PurchasesList: React.FC = () => {
 								<TableCell>Valor Total</TableCell>
 								<TableCell>Detalhes</TableCell>
 								<TableCell align="right">Efetivar Estoque</TableCell>
+								<TableCell align="right" width={105}>Cancelar Pedido</TableCell>
 							</TableRow>
 						)}
 						CustomTableRow={({ row }) => (
@@ -110,6 +113,14 @@ export const PurchasesList: React.FC = () => {
 										<AddTaskIcon color="info" />
 									</Fab>
 								</TableCell>
+								<TableCell align="right">
+									<Fab
+										size="medium"
+										color="error"
+									>
+										<BlockIcon />
+									</Fab>
+								</TableCell>
 							</TableRow>
 						)}
 						CustomTableSkeleton={() => (
@@ -118,7 +129,8 @@ export const PurchasesList: React.FC = () => {
 								<TableCell><Skeleton sx={{ minHeight: 40, maxWidth: 80 }} /></TableCell>
 								<TableCell><Skeleton sx={{ minHeight: 40, maxWidth: 80 }} /></TableCell>
 								<TableCell><Skeleton sx={{ minHeight: 40, maxWidth: 80 }} /></TableCell>
-								<TableCell><Fab disabled size='medium'></Fab></TableCell>
+								<TableCell align="right"><Fab disabled size='medium'></Fab></TableCell>
+								<TableCell align="right" width={105}><Fab disabled size='medium'></Fab></TableCell>
 							</TableRow>
 						)}
 					/>
