@@ -83,12 +83,12 @@ export const AppRoutes = () => {
 			{/* Usuários */}
 			<Route path="/usuarios" element={<Users />} />
 
-			{/* Compras */}
-			<Route path="/compras" element={<PurchasesList />} />
-
 			{/* Packs */}
 			<Route path="/embalagens" element={<Packs />} />
 
+			{/* Pedidos */}
+			<Route path="/pedidos" element={<PurchasesList />} />
+			
 
 			{/* Página 404 */}
 			<Route path='/*' element={<Page404 />} />

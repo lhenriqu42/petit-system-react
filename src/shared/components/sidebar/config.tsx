@@ -100,8 +100,8 @@ export const items = [
 		role: ['admin']
 	},
 	{
-		title: 'Compras',
-		path: '/compras',
+		title: 'Pedidos',
+		path: '/pedidos',
 		icon: (<AddShoppingCartIcon fontSize='small' />),
 		role: ['admin']
 	},
