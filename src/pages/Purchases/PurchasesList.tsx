@@ -22,7 +22,6 @@ import { ListItems } from "../../shared/components/ListItems";
 import { submitFormEvent } from "../../shared/events/formEvents";
 import { ModalButton } from "../../shared/components/ModalButton";
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
-import { width } from "@mui/system";
 
 
 export const PurchasesList: React.FC = () => {

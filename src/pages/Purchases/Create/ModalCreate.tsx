@@ -15,7 +15,7 @@ import { CustomAutoComplete } from "../../../shared/forms/customInputs/CustomAut
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import { CustomRow } from "./CustomRow";
 import Swal from "sweetalert2";
-import { ICreateBody, PurchaseService } from "../../../shared/services/api/PurchaseService";
+import { IPurchaseCreateBody, PurchaseService } from "../../../shared/services/api/PurchaseService";
 import { submitFormEvent } from "../../../shared/events/formEvents";
 import { listReloadEvent } from "../../../shared/events/listReload";
 import { modalCloseEvent } from "../../../shared/events/modalEvents";
@@ -222,7 +222,7 @@ export const CreateModalContent: React.FC = () => {
 			}
 		}
 
-		const body: ICreateBody = {
+		const body: IPurchaseCreateBody = {
 			supplier_id: supplierSelected.id,
 			purchases: selected.map(item => ({
 				type: item.data.mode,
@@ -294,7 +294,7 @@ export const CreateModalContent: React.FC = () => {
 						<ListItems
 							height={625}
 							itemsPerPage={11}
-							filters={prodSearch}
+							filters={{ search: prodSearch, orderByStock: true }}
 							apiCall={ProductService.getAll}
 							CustomTableRow={({ row }) => {
 								const obj: ISelectedItem = {
@@ -309,6 +309,8 @@ export const CreateModalContent: React.FC = () => {
 								return (
 									<TableRow hover sx={{ cursor: 'pointer' }} onClick={() => toggleSelect(obj)} selected={selected.some(item => item.prod_id === row.id)}>
 										<TableCell>{row.name}</TableCell>
+										{/* <TableCell align="right">{nToBRL(row.price)}</TableCell> */}
+										<TableCell align="right">{row.stock}</TableCell>
 									</TableRow>
 								);
 							}}

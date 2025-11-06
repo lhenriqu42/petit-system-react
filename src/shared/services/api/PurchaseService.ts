@@ -11,7 +11,7 @@ const Autorization = () => {
 }
 
 
-export interface ICreateBody {
+export interface IPurchaseCreateBody {
 	supplier_id: number;
 	purchases: {
 		type: 'PACK' | 'PRODUCT';
@@ -22,7 +22,7 @@ export interface ICreateBody {
 	}[];
 }
 
-export interface IGetAllResponse {
+export interface IPurchaseGetAllResponse {
 	data: {
 		id: number,
 		supplier_id: number,
@@ -35,7 +35,7 @@ export interface IGetAllResponse {
 }
 
 
-const create = async (body: ICreateBody): Promise<number | Error> => {
+const create = async (body: IPurchaseCreateBody): Promise<number | Error> => {
 	body.purchases = body.purchases.map((item) => {
 		const pack_id = item.type === 'PACK' ? item.pack_id : undefined;
 		return {
@@ -57,7 +57,7 @@ const create = async (body: ICreateBody): Promise<number | Error> => {
 	}
 };
 
-const getAll = async (page = 1, limit = Environment.LIMITE_DE_LINHAS): Promise<IGetAllResponse | Error> => {
+const getAll = async (page = 1, limit = Environment.LIMITE_DE_LINHAS): Promise<IPurchaseGetAllResponse | Error> => {
 	try {
 		const urlRelativa = urlBuilder('/purchase', { page, limit });
 		const { data, headers } = await Api.get(urlRelativa, Autorization());

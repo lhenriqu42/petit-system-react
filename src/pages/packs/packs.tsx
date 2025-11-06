@@ -258,7 +258,7 @@ export const Packs: React.FC = () => {
 													id="prod-list"
 													itemsPerPage={8}
 													height={470}
-													filters={prodSearch}
+													filters={{search: prodSearch, orderByStock: false}}
 													apiCall={ProductService.getAll}
 													CustomTableRow={({ row }) => (
 														<TableRow hover sx={{ cursor: 'pointer' }} onClick={() => setProdSelected(row)} selected={prodSelected && row.id === prodSelected.id}>

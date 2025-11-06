@@ -64,7 +64,7 @@ export const Validity: React.FC = () => {
 
 	const listProducts = async () => {
 		setLoadingPageProd(true);
-		const response = await ProductService.getAll(Number(prodPage), PRODUCT_ROW_LIMIT, prodSearch);
+		const response = await ProductService.getAll(Number(prodPage), PRODUCT_ROW_LIMIT, { search: prodSearch, orderByStock: false });
 		if (response instanceof Error) return alert('Erro ao procurar por produtos');
 		setProdRows(response.data);
 		setProdTotalCount(response.totalCount);
