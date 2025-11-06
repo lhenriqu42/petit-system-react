@@ -43,7 +43,8 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 			if (packsResult.data.length === 0) {
 				setPacks([{ text: 'Nenhuma embalagem encontrada', value: '' }]);
 			} else {
-				updateSelectedData(row.prod_id, 'pack_id', Number(packsResult.data[0].id));
+				if (!pack_id)
+					updateSelectedData(row.prod_id, 'pack_id', Number(packsResult.data[0].id));
 				setPacks(packsResult.data.map((pack) => ({ text: pack.description.slice(14), value: String(pack.id) })));
 			}
 			setLoading(false);
