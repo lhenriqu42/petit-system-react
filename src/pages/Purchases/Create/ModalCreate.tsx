@@ -72,6 +72,21 @@ export const CreateModalContent: React.FC = () => {
 	};
 
 
+
+	// TOTAL VALUE
+	const [totalValue, setTotalValue] = useState<number>(0);
+	useEffect(() => {
+		let total = 0;
+		selected.forEach((item) => {
+			const price = BRLToN(item.data.price);
+			total += price * item.data.quantity;
+		});
+		setTotalValue(total);
+	}, [selected]);
+
+
+
+
 	// CACHED ITEMS
 	function cachedItems(): ISelectedItem[] {
 		const cached = localStorage.getItem('purchase_create_selected_items');
@@ -261,6 +276,10 @@ export const CreateModalContent: React.FC = () => {
 								<Box display={'flex'} alignItems={'center'}>
 									<Typography>Fornecedor:</Typography>
 									<Typography ml={1} fontWeight={'bold'} color={sup ? 'success' : 'error'}>{sup ? sup.name : 'Nenhum'}</Typography>
+								</Box>
+								<Box display={'flex'} alignItems={'center'}>
+									<Typography>Valor Total:</Typography>
+									<Typography ml={1} fontWeight={'bold'} color={totalValue > 0 ? 'success' : 'textPrimary'}>{nToBRL(totalValue)}</Typography>
 								</Box>
 							</Box>
 						);
