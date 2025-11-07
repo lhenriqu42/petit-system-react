@@ -24,11 +24,10 @@ interface CustomRowProps {
 	quantity?: number;
 	price?: string;
 	pack_id?: number;
-	sale_price: number;
 	updateSelectedData: <K extends keyof ISelectedItemData>(prod_id: number, key: K, value: ISelectedItemData[K]) => void;
 }
 
-export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, pack_id, updateSelectedData, sale_price }: CustomRowProps) {
+export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, pack_id, updateSelectedData }: CustomRowProps) {
 
 	const [packs, setPacks] = useState<{ text: string; value: string }[]>([{ text: 'Carregando...', value: '' }]);
 	const [loading, setLoading] = useState(true);
