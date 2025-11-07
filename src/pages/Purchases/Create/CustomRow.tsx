@@ -10,7 +10,7 @@ import { memo, useEffect, useState } from "react";
 import { ModalRelacionar } from "../../packs/packs";
 import InventoryIcon from '@mui/icons-material/Inventory';
 import { PackService } from "../../../shared/services/api";
-import { nToBRL } from "../../../shared/services/formatters";
+import { BRLToN, nToBRL } from "../../../shared/services/formatters";
 import { ISelectedItem, ISelectedItemData } from "./ModalCreate";
 import { listReloadEvent } from "../../../shared/events/listReload";
 import { ModalButton } from "../../../shared/components/ModalButton";
@@ -110,17 +110,6 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 				)}
 			</TableCell>
 
-			<TableCell>
-				{nToBRL(row.sale_price).split(/(\d+)/).map((part, i) =>
-					/\d+/.test(part) ? (
-						<Typography component="span" key={i} color="secondary" fontWeight={700}>
-							{part}
-						</Typography>
-					) : (
-						<span key={i}>{part}</span>
-					)
-				)}
-			</TableCell>
 
 			<TableCell width={150}>
 				<CustomButtonGroup
@@ -216,6 +205,22 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 						updateSelectedData(row.prod_id, 'price', handleCashChange(e.target.value))
 					}
 				/>
+			</TableCell>
+
+			<TableCell width={80}>
+				{
+					price === undefined || quantity === undefined ? '-' : (
+						nToBRL(BRLToN(price) * quantity).split(/(\d+)/).map((part, i) =>
+							/\d+/.test(part) ? (
+								<Typography component="span" key={i} color="secondary" fontWeight={700}>
+									{part}
+								</Typography>
+							) : (
+								<span key={i}>{part}</span>
+							)
+						)
+					)
+				}
 			</TableCell>
 		</TableRow>
 	);

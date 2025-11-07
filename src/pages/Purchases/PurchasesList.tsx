@@ -83,7 +83,15 @@ export const PurchasesList: React.FC = () => {
 							</TableRow>
 						)}
 						CustomTableRow={({ row }) => (
-							<TableRow>
+							<TableRow
+								key={row.id}
+								sx={
+									row.effected ?
+										{ backgroundColor: '#d4edda', '&:hover': { backgroundColor: '#c3e6cb' } }
+										:
+										{ '&:hover': { backgroundColor: '#1111' } }
+								}
+							>
 								<TableCell>{format(new Date(row.created_at), 'dd/MM/yyyy - HH:mm')}</TableCell>
 								<TableCell>{row.supplier_name}</TableCell>
 								<TableCell>{nToBRL(row.total_value)}</TableCell>
@@ -101,24 +109,32 @@ export const PurchasesList: React.FC = () => {
 									</Link>
 								</TableCell>
 								<TableCell align="right">
-									<Fab
-										size="medium"
-										color="success"
-									// sx={{
-									// 	backgroundColor: '#5bc0de',
-									// 	'&:hover': { backgroundColor: '#6fd8ef' },
-									// }}
-									>
-										<AddTaskIcon color="info" />
-									</Fab>
+									{
+										!row.effected && (
+											<Fab
+												size="medium"
+												color="success"
+											// sx={{
+											// 	backgroundColor: '#5bc0de',
+											// 	'&:hover': { backgroundColor: '#6fd8ef' },
+											// }}
+											>
+												<AddTaskIcon color="info" />
+											</Fab>
+										)
+									}
 								</TableCell>
 								<TableCell align="right">
-									<Fab
-										size="medium"
-										color="error"
-									>
-										<BlockIcon />
-									</Fab>
+									{
+										!row.effected && (
+											<Fab
+												size="medium"
+												color="error"
+											>
+												<BlockIcon />
+											</Fab>
+										)
+									}
 								</TableCell>
 							</TableRow>
 						)}

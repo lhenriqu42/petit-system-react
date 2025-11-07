@@ -29,6 +29,7 @@ export interface IPurchaseGetAllResponse {
 		total_value: number,
 		created_at: Date,
 		updated_at: Date,
+		effected: boolean,
 		supplier_name: string,
 	}[]
 	totalCount: number;
