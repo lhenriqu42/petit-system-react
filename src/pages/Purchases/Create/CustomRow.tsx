@@ -24,10 +24,11 @@ interface CustomRowProps {
 	quantity?: number;
 	price?: string;
 	pack_id?: number;
+	sale_price: number;
 	updateSelectedData: <K extends keyof ISelectedItemData>(prod_id: number, key: K, value: ISelectedItemData[K]) => void;
 }
 
-export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, pack_id, updateSelectedData }: CustomRowProps) {
+export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, pack_id, updateSelectedData, sale_price }: CustomRowProps) {
 
 	const [packs, setPacks] = useState<{ text: string; value: string }[]>([{ text: 'Carregando...', value: '' }]);
 	const [loading, setLoading] = useState(true);
@@ -98,8 +99,20 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 	};
 	return (
 		<TableRow hover sx={{ cursor: 'default', height: 80 }}>
-			<TableCell width={170}>
+			<TableCell width={140}>
 				{row.prod_name.split(/(\d+)/).map((part, i) =>
+					/\d+/.test(part) ? (
+						<Typography component="span" key={i} color="secondary" fontWeight={700}>
+							{part}
+						</Typography>
+					) : (
+						<span key={i}>{part}</span>
+					)
+				)}
+			</TableCell>
+
+			<TableCell>
+				{nToBRL(row.sale_price).split(/(\d+)/).map((part, i) =>
 					/\d+/.test(part) ? (
 						<Typography component="span" key={i} color="secondary" fontWeight={700}>
 							{part}
@@ -129,7 +142,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 				/>
 			</TableCell>
 
-			<TableCell width={215}>
+			<TableCell width={220}>
 				<Box display="flex" alignItems="self-start" gap={1}>
 					{mode === 'PACK' &&
 						(
@@ -195,7 +208,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 				/>
 			</TableCell>
 
-			<TableCell width={100}>
+			<TableCell width={120}>
 				<TextField
 					size="small"
 					label="Preço Unitário"

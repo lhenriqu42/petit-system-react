@@ -24,6 +24,7 @@ export interface ISelectedItem {
 	prod_id: number;
 	prod_name: string;
 	data: ISelectedItemData;
+	sale_price: number;
 }
 
 export interface ISelectedItemData {
@@ -166,12 +167,14 @@ export const CreateModalContent: React.FC = () => {
 			const selected = selectedRef.current.find((i) => i.prod_id === row.prod_id);
 			// console.log('Rendering row for prod_id:', row.prod_id, 'with selected data:', selected);
 			return (
+				selected &&
 				<CustomRow
 					row={row}
-					pack_id={selected?.data.pack_id}
-					mode={selected?.data.mode}
-					quantity={selected?.data.quantity}
-					price={selected?.data.price}
+					pack_id={selected.data.pack_id}
+					mode={selected.data.mode}
+					quantity={selected.data.quantity}
+					price={selected.data.price}
+					sale_price={selected.sale_price}
 					updateSelectedData={updateSelectedData}
 				/>
 			);
@@ -300,6 +303,7 @@ export const CreateModalContent: React.FC = () => {
 								const obj: ISelectedItem = {
 									prod_id: row.id,
 									prod_name: row.name,
+									sale_price: row.price,
 									data: {
 										mode: 'PACK',
 										quantity: 1,
@@ -309,8 +313,7 @@ export const CreateModalContent: React.FC = () => {
 								return (
 									<TableRow hover sx={{ cursor: 'pointer' }} onClick={() => toggleSelect(obj)} selected={selected.some(item => item.prod_id === row.id)}>
 										<TableCell>{row.name}</TableCell>
-										{/* <TableCell align="right">{nToBRL(row.price)}</TableCell> */}
-										<TableCell align="right">{row.stock}</TableCell>
+										<TableCell align="right" sx={{ fontWeight: 700 }}>{row.stock}</TableCell>
 									</TableRow>
 								);
 							}}
