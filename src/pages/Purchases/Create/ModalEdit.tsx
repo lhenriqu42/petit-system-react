@@ -120,7 +120,7 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 	function clearCache() {
 		localStorage.removeItem(`purchase_edit_selected_${purchaseId}`);
 		localStorage.removeItem(`purchase_edit_sup_${purchaseId}`);
-		listReloadEvent.emit('purchase_list');
+		listReloadEvent.emit('purchase_list', { page: 'current' });
 		setReloadKey(prev => prev + 1);
 	}
 
@@ -388,7 +388,7 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 											variant="outlined"
 											color="secondary"
 											onClick={() => clearCache()}
-											startIcon={<CachedIcon />}>Limpar Memória</Button>
+											startIcon={<CachedIcon />}>Cancelar Edição</Button>
 										<Button
 											size="small"
 											variant="contained"

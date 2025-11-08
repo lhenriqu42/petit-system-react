@@ -27,10 +27,43 @@ import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import { ModalFab } from "../../shared/components/ModalFab";
 import { EditModalContent } from "./Create/ModalEdit";
 import { listReloadEvent } from "../../shared/events/listEvents";
+import Swal from "sweetalert2";
 
 
 export const PurchasesList: React.FC = () => {
 
+	const completePurchase = (isEditing: boolean, purchaseId: number, supplier_name: string) => {
+		if (isEditing) {
+			Swal.fire({
+				title: 'Atenção',
+				text: 'Existem alterações não salvas neste pedido. Por favor, salve ou descarte as alterações antes de concluir o pedido.',
+			});
+			return;
+		}
+		Swal.fire({
+			title: 'Concluir Pedido',
+			html: `Fornecedor: <b>${supplier_name.toUpperCase()}</b><br><br>Tem certeza que deseja concluir o pedido? Isso vai acrescentar os produtos ao estoque. Esta ação não pode ser desfeita.`,
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				PurchaseService.completePurchase(purchaseId).then(() => {
+					// Swal.fire(
+					// 	'Concluído!',
+					// 	'O pedido foi concluído e os produtos foram adicionados ao estoque.',
+					// 	'success'
+					// );
+					listReloadEvent.emit('purchase_list', { page: 'current' });
+				}).catch(() => {
+					Swal.fire(
+						'Erro',
+						'Ocorreu um erro ao concluir o pedido. Por favor, tente novamente.',
+						'error'
+					);
+				});
+			}
+		});
+	}
 
 	return (
 		<>
@@ -154,6 +187,7 @@ export const PurchasesList: React.FC = () => {
 															<Fab
 																size="medium"
 																color="success"
+																onClick={() => completePurchase(isEditing, row.id, row.supplier_name)}
 															>
 																<AddTaskIcon color="info" />
 															</Fab>
