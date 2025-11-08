@@ -13,9 +13,9 @@ import {
 	SxProps,
 } from "@mui/material";
 import './../../shared/css/sweetAlert.css';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Environment } from "../environment";
-import { listReloadEvent } from "../../shared/events/listReload";
+import { listReloadEvent } from "../events/listEvents";
 import { useDeepEffect } from '../../shared/hooks/UseDeepEffect';
 
 export type GetAllFunction<TData, TFilter = undefined> = (
@@ -101,14 +101,15 @@ export function ListItems<TData, TFilter = undefined>({
 	}, [filters]);
 
 	useDeepEffect(() => {
-		const unsubscribe = listReloadEvent.on((target) => {
+		const unsubscribe = listReloadEvent.on((target, props) => {
 			if (target == "*" || target == id) {
-				setPage(1);
-				list(1, filters);
+				const page = props?.page ?? 1;
+				if (page === 'current') return list();
+				list(page, filters);
 			}
 		});
 		return unsubscribe; // remove listener ao desmontar
-	}, [filters]);
+	}, [filters, page, id]);
 
 	return (
 		<Box height={height} display={'flex'} flexDirection={'column'} justifyContent={'space-between'}>

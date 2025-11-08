@@ -1,6 +1,6 @@
 na tela de pedidos colocar Criacao de embalagem
-pensar em uma forma de salvar o pedido e nao resetar ao fechar o modal
+possibilitar excluir embalagens criadas
+
 possibilitar adicionar vendas a caixas de passados ja fechados
 aumentar a fonte do preco total na tela de vendas
-mostrar estoque dos produtos na tela de vendas
 acabei quebrando o CustomSelect na pagina de estoque, boletos

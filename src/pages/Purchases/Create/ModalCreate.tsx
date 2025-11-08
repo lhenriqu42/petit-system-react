@@ -17,14 +17,13 @@ import { CustomRow } from "./CustomRow";
 import Swal from "sweetalert2";
 import { IPurchaseCreateBody, PurchaseService } from "../../../shared/services/api/PurchaseService";
 import { submitFormEvent } from "../../../shared/events/formEvents";
-import { listReloadEvent } from "../../../shared/events/listReload";
+import { listReloadEvent } from "../../../shared/events/listEvents";
 import { modalCloseEvent } from "../../../shared/events/modalEvents";
 
 export interface ISelectedItem {
 	prod_id: number;
 	prod_name: string;
 	data: ISelectedItemData;
-	sale_price: number;
 }
 
 export interface ISelectedItemData {
@@ -174,7 +173,6 @@ export const CreateModalContent: React.FC = () => {
 					mode={selected.data.mode}
 					quantity={selected.data.quantity}
 					price={selected.data.price}
-					sale_price={selected.sale_price}
 					updateSelectedData={updateSelectedData}
 				/>
 			);
@@ -245,7 +243,7 @@ export const CreateModalContent: React.FC = () => {
 				title: 'Sucesso',
 				text: 'Compra criada com sucesso.',
 				willClose: () => {
-					modalCloseEvent.emit('purchase_create_modal');
+					modalCloseEvent.emit({modalId: 'purchase_create_modal'});
 					listReloadEvent.emit('purchase_list');
 					setSelected([]);
 				}
@@ -254,7 +252,7 @@ export const CreateModalContent: React.FC = () => {
 	}
 	// SUBMIT EVENT
 	useEffect(() => {
-		const unsubscribe = submitFormEvent.on((target) => target === 'purchase_create' && submit());
+		const unsubscribe = submitFormEvent.on(({formId}) => formId === 'purchase_create' && submit());
 		return unsubscribe;
 	}, [supplierSelected, selected]);
 
@@ -303,7 +301,6 @@ export const CreateModalContent: React.FC = () => {
 								const obj: ISelectedItem = {
 									prod_id: row.id,
 									prod_name: row.name,
-									sale_price: row.price,
 									data: {
 										mode: 'PACK',
 										quantity: 1,

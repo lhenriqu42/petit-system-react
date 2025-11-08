@@ -12,7 +12,7 @@ import {
 import './../../shared/css/sweetAlert.css';
 import { useCallback, useEffect, useState } from "react";
 import { Environment } from "../environment";
-import { listReloadEvent } from "../../shared/events/listReload";
+import { listReloadEvent } from "../events/listEvents";
 
 interface PaginationProps<TData> {
 	items: TData[];

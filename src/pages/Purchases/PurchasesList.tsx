@@ -6,6 +6,8 @@ import {
 	Skeleton,
 	TableRow,
 	TableCell,
+	Typography,
+	Icon,
 } from "@mui/material";
 import { format } from 'date-fns';
 import { Link } from "react-router-dom";
@@ -22,6 +24,9 @@ import { ListItems } from "../../shared/components/ListItems";
 import { submitFormEvent } from "../../shared/events/formEvents";
 import { ModalButton } from "../../shared/components/ModalButton";
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+import { ModalFab } from "../../shared/components/ModalFab";
+import { EditModalContent } from "./Create/ModalEdit";
+import { listReloadEvent } from "../../shared/events/listEvents";
 
 
 export const PurchasesList: React.FC = () => {
@@ -38,7 +43,7 @@ export const PurchasesList: React.FC = () => {
 								p: 0,
 								title: "Novo Pedido",
 								maxWidth: 'xl',
-								submit: async () => { submitFormEvent.emit('purchase_create') },
+								submit: async () => { submitFormEvent.emit({ formId: 'purchase_create' }) },
 								submitButtonProps: { Text: "Salvar" },
 								ModalContent:
 									<CreateModalContent />,
@@ -78,74 +83,113 @@ export const PurchasesList: React.FC = () => {
 								<TableCell>Fornecedor</TableCell>
 								<TableCell>Valor Total</TableCell>
 								<TableCell>Detalhes</TableCell>
-								<TableCell align="right">Efetivar Estoque</TableCell>
-								<TableCell align="right" width={105}>Cancelar Pedido</TableCell>
+								<TableCell align="right">Ações</TableCell>
 							</TableRow>
 						)}
-						CustomTableRow={({ row }) => (
-							<TableRow
-								key={row.id}
-								sx={
-									row.effected ?
-										{ backgroundColor: '#d4edda', '&:hover': { backgroundColor: '#c3e6cb' } }
-										:
-										{ '&:hover': { backgroundColor: '#1111' } }
-								}
-							>
-								<TableCell>{format(new Date(row.created_at), 'dd/MM/yyyy - HH:mm')}</TableCell>
-								<TableCell>{row.supplier_name}</TableCell>
-								<TableCell>{nToBRL(row.total_value)}</TableCell>
-								<TableCell>
-									<Link to={`/compras/${row.id}`}>
-										<Fab
-											size="medium"
-											sx={{
-												backgroundColor: '#5bc0de',
-												'&:hover': { backgroundColor: '#6fd8ef' },
-											}}
-										>
-											<VisibilityRoundedIcon color="info" />
-										</Fab>
-									</Link>
-								</TableCell>
-								<TableCell align="right">
-									{
-										!row.effected && (
-											<Fab
-												size="medium"
-												color="success"
-											// sx={{
-											// 	backgroundColor: '#5bc0de',
-											// 	'&:hover': { backgroundColor: '#6fd8ef' },
-											// }}
-											>
-												<AddTaskIcon color="info" />
-											</Fab>
-										)
-									}
-								</TableCell>
-								<TableCell align="right">
-									{
-										!row.effected && (
-											<Fab
-												size="medium"
-												color="error"
-											>
-												<BlockIcon />
-											</Fab>
-										)
-									}
-								</TableCell>
-							</TableRow>
-						)}
+						CustomTableRow={
+							({ row }) => {
+
+								const someCache = sessionStorage.getItem(`purchase_edit_selected_${row.id}`) || sessionStorage.getItem(`purchase_edit_sup_${row.id}`);
+								const isEditing: boolean = !!someCache;
+								return (
+									<TableRow
+										key={row.id}
+										sx={
+											row.effected ?
+												{ backgroundColor: '#d4edda', '&:hover': { backgroundColor: '#c3e6cb' } }
+												:
+												isEditing ?
+													{ backgroundColor: '#fff3cd', '&:hover': { backgroundColor: '#ffe8a1' } }
+													:
+													{ '&:hover': { backgroundColor: '#1111' } }
+										}
+									>
+										<TableCell>{format(new Date(row.created_at), 'dd/MM/yyyy - HH:mm')}</TableCell>
+										<TableCell>{row.supplier_name}</TableCell>
+										<TableCell>{nToBRL(row.total_value)}</TableCell>
+										<TableCell>
+											<Link to={`/compras/${row.id}`}>
+												<Fab
+													size="medium"
+													sx={{
+														backgroundColor: '#5bc0de',
+														'&:hover': { backgroundColor: '#6fd8ef' },
+													}}
+												>
+													<VisibilityRoundedIcon color="info" />
+												</Fab>
+											</Link>
+										</TableCell>
+
+										<TableCell align="right">
+											<Box display="flex" gap={1} justifyContent="flex-end">
+												<Box key={'edit'}>
+													{
+														!row.effected && (
+															<ModalFab
+																onClose={() => { listReloadEvent.emit('purchase_list', { page: 'current' }) }}
+																size="medium"
+																color="warning"
+																modalProps={{
+																	id: 'purchase_edit_modal',
+																	p: 0,
+																	maxWidth: 'xl',
+																	submit: async () => { submitFormEvent.emit({ formId: 'purchase_edit' }) },
+																	submitButtonProps: { Text: "Salvar" },
+																	title: `Editar Pedido #${row.id}`,
+																	ModalContent: (
+																		<EditModalContent purchaseId={row.id} />
+																	)
+																}}
+															>
+																<Icon>edit</Icon>
+															</ModalFab>
+														)
+													}
+												</Box>
+												<Box key={'effect'}>
+
+													{
+														!row.effected ? (
+															<Fab
+																size="medium"
+																color="success"
+															>
+																<AddTaskIcon color="info" />
+															</Fab>
+														) : <Typography variant="body2" color="green">Concluído</Typography>
+													}
+												</Box>
+												<Box key={'cancel'}>
+
+													{
+														!row.effected && (
+															<Fab
+																size="medium"
+																color="error"
+															>
+																<BlockIcon />
+															</Fab>
+														)
+													}
+												</Box>
+											</Box>
+										</TableCell>
+									</TableRow>
+								)
+							}
+						}
 						CustomTableSkeleton={() => (
 							<TableRow>
-								<TableCell><Skeleton sx={{ minHeight: 40, maxWidth: 50 }} /></TableCell>
+								<TableCell width={200}><Skeleton sx={{ minHeight: 40, maxWidth: 50 }} /></TableCell>
 								<TableCell><Skeleton sx={{ minHeight: 40, maxWidth: 80 }} /></TableCell>
 								<TableCell><Skeleton sx={{ minHeight: 40, maxWidth: 80 }} /></TableCell>
 								<TableCell><Skeleton sx={{ minHeight: 40, maxWidth: 80 }} /></TableCell>
-								<TableCell align="right"><Fab disabled size='medium'></Fab></TableCell>
-								<TableCell align="right" width={105}><Fab disabled size='medium'></Fab></TableCell>
+								<TableCell align="right">
+									<Fab disabled size='medium' />
+									<Fab disabled size='medium' sx={{ mx: 1 }} />
+									<Fab disabled size='medium' />
+								</TableCell>
 							</TableRow>
 						)}
 					/>

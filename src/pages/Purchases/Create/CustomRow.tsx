@@ -12,7 +12,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import { PackService } from "../../../shared/services/api";
 import { BRLToN, nToBRL } from "../../../shared/services/formatters";
 import { ISelectedItem, ISelectedItemData } from "./ModalCreate";
-import { listReloadEvent } from "../../../shared/events/listReload";
+import { listReloadEvent } from "../../../shared/events/listEvents";
 import { ModalButton } from "../../../shared/components/ModalButton";
 import { modalCloseEvent } from "../../../shared/events/modalEvents";
 import { CustomSelect } from "../../../shared/forms/customInputs/CustomSelect";
@@ -79,7 +79,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 				title: 'Sucesso',
 				text: 'Relação realizada com sucesso!',
 				willClose: () => {
-					modalCloseEvent.emit(modal_id);
+					modalCloseEvent.emit({ modalId: modal_id });
 					listReloadEvent.emit('array-selected-items');
 				}
 			});

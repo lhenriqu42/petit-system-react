@@ -62,8 +62,8 @@ export const Modal: React.FC<IModalProps> = ({
 	};
 
 	useEffect(() => {
-		const unsubscribe = modalCloseEvent.on((target) => {
-			if (target == "*" || target == id) {
+		const unsubscribe = modalCloseEvent.on(({ modalId }) => {
+			if (modalId == "*" || modalId == id) {
 				handleClose();
 			}
 		});

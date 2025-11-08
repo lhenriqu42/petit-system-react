@@ -1,16 +1,16 @@
-type Listener<T> = (payload: T) => void;
+type Listener<TArgs extends any[]> = (...args: TArgs) => void;
 
-export class EventEmitter<T = void> {
-	private listeners = new Set<Listener<T>>();
+export class EventEmitter<TArgs extends any[] = []> {
+	private listeners = new Set<Listener<TArgs>>();
 
-	on(listener: Listener<T>) {
+	on(listener: Listener<TArgs>) {
 		this.listeners.add(listener);
-		return () => {this.listeners.delete(listener)};
+		return () => { this.listeners.delete(listener) };
 	}
 
-	emit(payload: T extends void ? undefined : T) {
+	emit(...args: TArgs) {
 		for (const listener of this.listeners) {
-			listener(payload as T);
+			listener(...args);
 		}
 	}
 }

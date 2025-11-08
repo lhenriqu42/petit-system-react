@@ -20,7 +20,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CustomTextField } from "../../shared/forms/customInputs/CustomTextField";
 import { CustomButtonGroup } from "../../shared/forms/customInputs/CustomButtonGroup";
 
-import { listReloadEvent } from "../../shared/events/listReload";
+import { listReloadEvent } from "../../shared/events/listEvents";
 import { ListArray } from "../../shared/components/ListArray";
 import Swal from "sweetalert2";
 import { modalCloseEvent } from "../../shared/events/modalEvents";
@@ -116,7 +116,7 @@ export const Packs: React.FC = () => {
 				title: 'Sucesso',
 				text: 'Relação realizada com sucesso!',
 				willClose: () => {
-					modalCloseEvent.emit("*");
+					modalCloseEvent.emit({modalId: "*"});
 					listReloadEvent.emit('*');
 					setProdSearch("");
 				}
