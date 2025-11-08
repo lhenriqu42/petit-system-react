@@ -72,8 +72,15 @@ export const ViewModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 								</Box>
 								<Box border={1} borderColor={'#77f'} borderRadius={2} height={'100%'} pb={1} mb={1.5} sx={{ backgroundColor: '#fafafe' }}>
 									{(() => {
-										const ProdPartColor = ['#faface', '#f0f0a0'];
-										const purchasePartColor = ['#b9cdff', '#719df8'];
+										const ProdPartColor = {
+											header: { text: '#000', bg: '#f7f746ff', lines: '#e0d50099' },
+											row: { text: '#000', bg: '#faface', lines: '#e0d50099' }
+										};
+
+										const purchasePartColor = {
+											header: { text: '#FFFFFF', bg: '#004C99', lines: '#003366' },
+											row: { text: '#000', bg: '#D0E4FB', lines: '#A0C4FF' }
+										};
 										return (
 											<ListArray
 												id='purchase-items-list'
@@ -83,14 +90,53 @@ export const ViewModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 												items={data.items_summary.items}
 												CustomTableRowHeader={() => (
 													<TableRow>
-														<TableCell sx={{ borderRadius: '7px 0 0 0', backgroundColor: ProdPartColor[1] }}>Produto</TableCell>
-														<TableCell sx={{ backgroundColor: ProdPartColor[1] }}>Preço Venda</TableCell>
+														<TableCell
+															sx={{
+																borderRadius: '7px 0 0 0',
+																backgroundColor: ProdPartColor.header.bg,
+																color: ProdPartColor.header.text,
+																borderBottomColor: ProdPartColor.header.lines
+															}}>
+															Produto
+														</TableCell>
 
-														<TableCell sx={{ backgroundColor: purchasePartColor[1] }}>Quantidade</TableCell>
-														<TableCell sx={{ backgroundColor: purchasePartColor[1] }}>Custo Unitário </TableCell>
+														<TableCell
+															sx={{
+																backgroundColor: ProdPartColor.header.bg,
+																color: ProdPartColor.header.text,
+																borderBottomColor: ProdPartColor.header.lines
+															}}>
+															Preço Venda
+														</TableCell>
 
-														<TableCell sx={{ backgroundColor: purchasePartColor[1] }}>Preço Total</TableCell>
-														<TableCell sx={{ borderRadius: '0 7px 0 0', backgroundColor: purchasePartColor[1] }}>Porcentagem Lucro</TableCell>
+														<TableCell
+															sx={{
+																backgroundColor: purchasePartColor.header.bg,
+																color: purchasePartColor.header.text,
+																borderBottomColor: purchasePartColor.header.lines
+															}}>
+															Quantidade
+														</TableCell>
+														<TableCell
+															sx={{
+																backgroundColor: purchasePartColor.header.bg,
+																color: purchasePartColor.header.text,
+																borderBottomColor: purchasePartColor.header.lines
+															}}>Custo Unitário </TableCell>
+
+														<TableCell
+															sx={{
+																backgroundColor: purchasePartColor.header.bg,
+																color: purchasePartColor.header.text,
+																borderBottomColor: purchasePartColor.header.lines
+															}}>Preço Total</TableCell>
+														<TableCell
+															sx={{
+																borderRadius: '0 7px 0 0',
+																backgroundColor: purchasePartColor.header.bg,
+																color: purchasePartColor.header.text,
+																borderBottomColor: purchasePartColor.header.lines
+															}}>Porcentagem Lucro</TableCell>
 
 													</TableRow>
 												)}
@@ -100,14 +146,50 @@ export const ViewModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 													const profitPercentage = ((row.prod_price - unitCost) / row.prod_price) * 100;
 													return (
 														<TableRow key={row.id}>
-															<TableCell sx={{ backgroundColor: ProdPartColor[0] }}>{row.prod_name}</TableCell>
-															<TableCell sx={{ backgroundColor: ProdPartColor[0] }}>{nToBRL(row.prod_price)}</TableCell>
+															<TableCell
+																sx={{
+																	borderRadius: '7px 0 0 0',
+																	backgroundColor: ProdPartColor.row.bg,
+																	color: ProdPartColor.row.text,
+																	borderBottomColor: ProdPartColor.row.lines
+																}}>
+																{row.prod_name}
+															</TableCell>
 
-															<TableCell sx={{ backgroundColor: purchasePartColor[0] }}>{realQnt}</TableCell>
-															<TableCell sx={{ backgroundColor: purchasePartColor[0] }}>{nToBRL(unitCost)}</TableCell>
+															<TableCell
+																sx={{
+																	borderRadius: '7px 0 0 0',
+																	backgroundColor: ProdPartColor.row.bg,
+																	color: ProdPartColor.row.text,
+																	borderBottomColor: ProdPartColor.row.lines
+																}}>{nToBRL(row.prod_price)}
+															</TableCell>
 
-															<TableCell sx={{ backgroundColor: purchasePartColor[0] }}>{nToBRL(row.pricetotal)}</TableCell>
-															<TableCell sx={{ backgroundColor: purchasePartColor[0] }}><Typography color={profitPercentage > PROFIT_TARGET_MARGIN ? 'success' : 'error'}>{profitPercentage.toFixed(2)}%</Typography></TableCell>
+															<TableCell
+																sx={{
+																	backgroundColor: purchasePartColor.row.bg,
+																	color: purchasePartColor.row.text,
+																	borderBottomColor: purchasePartColor.row.lines
+																}}>{realQnt}</TableCell>
+															<TableCell
+																sx={{
+																	backgroundColor: purchasePartColor.row.bg,
+																	color: purchasePartColor.row.text,
+																	borderBottomColor: purchasePartColor.row.lines
+																}}>{nToBRL(unitCost)}</TableCell>
+
+															<TableCell
+																sx={{
+																	backgroundColor: purchasePartColor.row.bg,
+																	color: purchasePartColor.row.text,
+																	borderBottomColor: purchasePartColor.row.lines
+																}}>{nToBRL(row.pricetotal)}</TableCell>
+															<TableCell
+																sx={{
+																	backgroundColor: purchasePartColor.row.bg,
+																	color: purchasePartColor.row.text,
+																	borderBottomColor: purchasePartColor.row.lines
+																}}><Typography color={profitPercentage > PROFIT_TARGET_MARGIN ? 'success' : 'error'}>{profitPercentage.toFixed(2)}%</Typography></TableCell>
 														</TableRow>
 													)
 												}}
