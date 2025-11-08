@@ -14,7 +14,7 @@ import { CustomTextField } from "../../../shared/forms/customInputs/CustomTextFi
 import { ISupplier, ProductService, SupplierService } from "../../../shared/services/api";
 import { CustomAutoComplete } from "../../../shared/forms/customInputs/CustomAutoComplete";
 import BackspaceIcon from '@mui/icons-material/Backspace';
-import { CustomRow } from "./CustomRow";
+import { CustomRow } from "../Utils/CustomRow";
 import Swal from "sweetalert2";
 import { GetDetailsError, IPurchaseCreateBody, PurchaseService } from "../../../shared/services/api/PurchaseService";
 import { submitFormEvent } from "../../../shared/events/formEvents";
@@ -70,7 +70,7 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 				return { selected: selectedCached, sup: { id: supSelect.id, label: supSelect.name } };
 			}
 			const result = await PurchaseService.getDetails(purchaseId);
-			const selectedItems: ISelectedItem[] = result.details.prod_list.map(item => ({
+			const selectedItems: ISelectedItem[] = result.items_summary.items.map(item => ({
 				prod_id: item.prod_id,
 				prod_name: item.prod_name,
 				data: {
@@ -80,7 +80,7 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 					pack_id: item.pack_id || undefined,
 				}
 			}));
-			const sup = suppliers.find(sup => sup.id === result.supplier_id);
+			const sup = suppliers.find(sup => sup.id === result.supplier.id);
 			if (!sup) throw new GetDetailsError('Fornecedor da compra não encontrado. Compra corrompida!');
 			return { selected: selectedItems, sup: { id: sup.id, label: sup.name } };
 		} catch (error) {
@@ -221,6 +221,7 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 					mode={selected.data.mode}
 					quantity={selected.data.quantity}
 					price={selected.data.price}
+					removeItem={toggleSelect}
 					updateSelectedData={updateSelectedData}
 				/>
 			);
@@ -250,59 +251,58 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 	};
 
 	const submit = async () => {
-		// 	if (!supplierSelected?.id || supplierSelected.id === -1) {
-		// 		SwalErrorf('Selecione um fornecedor.');
-		// 		return;
-		// 	}
+		if (!supplierSelected?.id || supplierSelected.id === -1) {
+			SwalErrorf('Selecione um fornecedor.');
+			return;
+		}
 
-		// 	if (selected.length === 0) {
-		// 		SwalErrorf('Selecione pelo menos um produto.');
-		// 		return;
-		// 	}
+		if (selected.length === 0) {
+			SwalErrorf('Selecione pelo menos um produto.');
+			return;
+		}
 
-		// 	for (const item of selected) {
-		// 		if (item.data.quantity <= 0) {
-		// 			SwalErrorf(`A quantidade do produto %b deve ser maior que 0.`, item.prod_name);
-		// 			return;
-		// 		}
-		// 		if (item.data.mode === 'PACK' && !item.data.pack_id) {
-		// 			SwalErrorf(`Selecione uma embalagem para o produto: %b.`, item.prod_name);
-		// 			return;
-		// 		}
-		// 	}
+		for (const item of selected) {
+			if (item.data.quantity <= 0) {
+				SwalErrorf(`A quantidade do produto %b deve ser maior que 0.`, item.prod_name);
+				return;
+			}
+			if (item.data.mode === 'PACK' && !item.data.pack_id) {
+				SwalErrorf(`Selecione uma embalagem para o produto: %b.`, item.prod_name);
+				return;
+			}
+		}
 
-		// 	const body: IPurchaseCreateBody = {
-		// 		supplier_id: supplierSelected.id,
-		// 		purchases: selected.map(item => ({
-		// 			type: item.data.mode,
-		// 			prod_id: item.prod_id,
-		// 			pack_id: item.data.pack_id,
-		// 			quantity: item.data.quantity,
-		// 			price: BRLToN(item.data.price)
-		// 		}))
-		// 	};
-		// 	try {
-		// 		if (purchaseChanged())
-		// 			await PurchaseService.update(purchaseId, body);
-		// 		await PurchaseService.completePurchase(purchaseId);
-		// 		Swal.fire({
-		// 			icon: 'success',
-		// 			title: 'Sucesso',
-		// 			text: 'Compra criada com sucesso.',
-		// 			willClose: () => {
-		// 				modalCloseEvent.emit('purchase_create_modal');
-		// 				listReloadEvent.emit('purchase_list');
-		// 				setSelected([]);
-		// 			}
-		// 		});
-		// 	} catch (error) {
-		// 		if (error instanceof Error)
-		// 			SwalErrorf(error.message);
-		// 	}
+		const body: IPurchaseCreateBody = {
+			supplier_id: supplierSelected.id,
+			purchases: selected.map(item => ({
+				type: item.data.mode,
+				prod_id: item.prod_id,
+				pack_id: item.data.pack_id,
+				quantity: item.data.quantity,
+				price: BRLToN(item.data.price)
+			}))
+		};
+		try {
+			await PurchaseService.update(purchaseId, body);
+			Swal.fire({
+				icon: 'success',
+				title: 'Sucesso',
+				text: 'Compra editada com sucesso.',
+				willClose: () => {
+					modalCloseEvent.emit({ modalId: 'purchase_edit_modal'});
+					clearCache();
+					listReloadEvent.emit('purchase_list', { page: 'current' });
+					setSelected([]);
+				}
+			});
+		} catch (error) {
+			if (error instanceof Error)
+				SwalErrorf(error.message);
+		}
 	}
 	// SUBMIT EVENT
 	useEffect(() => {
-		const unsubscribe = submitFormEvent.on(({formId}) => formId === 'purchase_edit' && submit());
+		const unsubscribe = submitFormEvent.on(({ formId }) => formId === 'purchase_edit' && submit());
 		return unsubscribe;
 	}, [supplierSelected, selected]);
 	return (

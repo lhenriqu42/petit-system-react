@@ -76,27 +76,32 @@ const getAll = async (page = 1, limit = Environment.LIMITE_DE_LINHAS): Promise<I
 	}
 };
 
-interface IPurchaseDetails {
+export interface IPurchaseDetails {
 	id: number;
-	supplier_id: number;
+	supplier: {
+		id: number;
+		name: string;
+	};
 	total_value: number;
 	effected: boolean;
 	created_at: Date;
 	updated_at: Date;
-	details: {
-		total_count: number;
-		prod_list: {
-			id: number,
-			purchase_id: number,
-			type: 'PACK' | 'PRODUCT',
-			prod_id: number,
-			prod_name: string,
-			pack_id: number | null,
-			quantity: number,
-			price: number,
-			pricetotal: number,
-			created_at: Date,
-			updated_at: Date,
+	items_summary: {
+		count: number;
+		items: {
+			id: number;
+			type: 'PACK' | 'PRODUCT';
+			quantity: number;
+			price: number;
+			pricetotal: number;
+
+			prod_id: number;
+			prod_name: string;
+			prod_price: number;
+
+			pack_id: number | null;
+			pack_quantity?: number | null;
+
 		}[];
 	};
 }

@@ -13,7 +13,7 @@ import { CustomTextField } from "../../../shared/forms/customInputs/CustomTextFi
 import { ISupplier, ProductService, SupplierService } from "../../../shared/services/api";
 import { CustomAutoComplete } from "../../../shared/forms/customInputs/CustomAutoComplete";
 import BackspaceIcon from '@mui/icons-material/Backspace';
-import { CustomRow } from "./CustomRow";
+import { CustomRow } from "../Utils/CustomRow";
 import Swal from "sweetalert2";
 import { IPurchaseCreateBody, PurchaseService } from "../../../shared/services/api/PurchaseService";
 import { submitFormEvent } from "../../../shared/events/formEvents";
@@ -173,6 +173,7 @@ export const CreateModalContent: React.FC = () => {
 					mode={selected.data.mode}
 					quantity={selected.data.quantity}
 					price={selected.data.price}
+					removeItem={toggleSelect}
 					updateSelectedData={updateSelectedData}
 				/>
 			);
@@ -243,7 +244,7 @@ export const CreateModalContent: React.FC = () => {
 				title: 'Sucesso',
 				text: 'Compra criada com sucesso.',
 				willClose: () => {
-					modalCloseEvent.emit({modalId: 'purchase_create_modal'});
+					modalCloseEvent.emit({ modalId: 'purchase_create_modal' });
 					listReloadEvent.emit('purchase_list');
 					setSelected([]);
 				}
@@ -252,7 +253,7 @@ export const CreateModalContent: React.FC = () => {
 	}
 	// SUBMIT EVENT
 	useEffect(() => {
-		const unsubscribe = submitFormEvent.on(({formId}) => formId === 'purchase_create' && submit());
+		const unsubscribe = submitFormEvent.on(({ formId }) => formId === 'purchase_create' && submit());
 		return unsubscribe;
 	}, [supplierSelected, selected]);
 

@@ -10,14 +10,13 @@ import {
 	Icon,
 } from "@mui/material";
 import { format } from 'date-fns';
-import { Link } from "react-router-dom";
 import AddIcon from '@mui/icons-material/Add';
 import CodeIcon from '@mui/icons-material/Code';
 import BlockIcon from '@mui/icons-material/Block';
 import { LayoutMain } from "../../shared/layouts";
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import { nToBRL } from "../../shared/services/formatters";
-import { CreateModalContent } from "./Create/ModalCreate";
+import { CreateModalContent } from "./Modals/ModalCreate";
 import { PurchaseService } from "../../shared/services/api";
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { ListItems } from "../../shared/components/ListItems";
@@ -25,9 +24,10 @@ import { submitFormEvent } from "../../shared/events/formEvents";
 import { ModalButton } from "../../shared/components/ModalButton";
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import { ModalFab } from "../../shared/components/ModalFab";
-import { EditModalContent } from "./Create/ModalEdit";
+import { EditModalContent } from "./Modals/ModalEdit";
 import { listReloadEvent } from "../../shared/events/listEvents";
 import Swal from "sweetalert2";
+import { ViewModalContent } from "./Modals/ModalView";
 
 
 export const PurchasesList: React.FC = () => {
@@ -75,7 +75,7 @@ export const PurchasesList: React.FC = () => {
 								id: 'purchase_create_modal',
 								p: 0,
 								title: "Novo Pedido",
-								maxWidth: 'xl',
+								maxWidth: '90%',
 								submit: async () => { submitFormEvent.emit({ formId: 'purchase_create' }) },
 								submitButtonProps: { Text: "Salvar" },
 								ModalContent:
@@ -141,17 +141,23 @@ export const PurchasesList: React.FC = () => {
 										<TableCell>{row.supplier_name}</TableCell>
 										<TableCell>{nToBRL(row.total_value)}</TableCell>
 										<TableCell>
-											<Link to={`/compras/${row.id}`}>
-												<Fab
-													size="medium"
-													sx={{
-														backgroundColor: '#5bc0de',
-														'&:hover': { backgroundColor: '#6fd8ef' },
-													}}
-												>
-													<VisibilityRoundedIcon color="info" />
-												</Fab>
-											</Link>
+											<ModalFab
+												size="medium"
+												backgroundColor={{default: '#5bc0de', hover: '#6fd8ef'}}
+												modalProps={{
+													id: 'purchase_view_modal',
+													p: 0,
+													maxWidth: '70%',
+													submitButtonProps: { Text: "Voltar" },
+													cancelButton: false,
+													title: `Visualizar Pedido #${row.id}`,
+													ModalContent: (
+														<ViewModalContent purchaseId={row.id} />
+													)
+												}}
+											>
+												<VisibilityRoundedIcon color="info" />
+											</ModalFab>
 										</TableCell>
 
 										<TableCell align="right">
@@ -166,9 +172,10 @@ export const PurchasesList: React.FC = () => {
 																modalProps={{
 																	id: 'purchase_edit_modal',
 																	p: 0,
-																	maxWidth: 'xl',
+																	maxWidth: '90%',
 																	submit: async () => { submitFormEvent.emit({ formId: 'purchase_edit' }) },
 																	submitButtonProps: { Text: "Salvar" },
+																	cancelButton: false,
 																	title: `Editar Pedido #${row.id}`,
 																	ModalContent: (
 																		<EditModalContent purchaseId={row.id} />

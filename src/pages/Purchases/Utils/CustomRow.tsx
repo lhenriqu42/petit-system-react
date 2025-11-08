@@ -11,11 +11,12 @@ import { ModalRelacionar } from "../../packs/packs";
 import InventoryIcon from '@mui/icons-material/Inventory';
 import { PackService } from "../../../shared/services/api";
 import { BRLToN, nToBRL } from "../../../shared/services/formatters";
-import { ISelectedItem, ISelectedItemData } from "./ModalCreate";
+import { ISelectedItem, ISelectedItemData } from "../Modals/ModalCreate";
 import { listReloadEvent } from "../../../shared/events/listEvents";
 import { ModalButton } from "../../../shared/components/ModalButton";
 import { modalCloseEvent } from "../../../shared/events/modalEvents";
 import { CustomSelect } from "../../../shared/forms/customInputs/CustomSelect";
+import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { CustomButtonGroup } from "../../../shared/forms/customInputs/CustomButtonGroup";
 
 interface CustomRowProps {
@@ -23,11 +24,12 @@ interface CustomRowProps {
 	mode?: 'PACK' | 'PRODUCT';
 	quantity?: number;
 	price?: string;
+	removeItem: (item: ISelectedItem) => void;
 	pack_id?: number;
 	updateSelectedData: <K extends keyof ISelectedItemData>(prod_id: number, key: K, value: ISelectedItemData[K]) => void;
 }
 
-export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, pack_id, updateSelectedData }: CustomRowProps) {
+export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, pack_id, updateSelectedData, removeItem }: CustomRowProps) {
 
 	const [packs, setPacks] = useState<{ text: string; value: string }[]>([{ text: 'Carregando...', value: '' }]);
 	const [loading, setLoading] = useState(true);
@@ -98,7 +100,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 	};
 	return (
 		<TableRow hover sx={{ cursor: 'default', height: 80 }}>
-			<TableCell width={140}>
+			<TableCell width={200}>
 				{row.prod_name.split(/(\d+)/).map((part, i) =>
 					/\d+/.test(part) ? (
 						<Typography component="span" key={i} color="secondary" fontWeight={700}>
@@ -111,7 +113,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 			</TableCell>
 
 
-			<TableCell width={150}>
+			<TableCell width={100}>
 				<CustomButtonGroup
 					key={row.prod_id}
 					size="small"
@@ -130,7 +132,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 				/>
 			</TableCell>
 
-			<TableCell width={220}>
+			<TableCell width={250}>
 				<Box display="flex" alignItems="self-start" gap={1}>
 					{mode === 'PACK' &&
 						(
@@ -184,7 +186,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 				</Box>
 			</TableCell>
 
-			<TableCell width={100}>
+			<TableCell width={170}>
 				<TextField
 					size="small"
 					type="number"
@@ -196,7 +198,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 				/>
 			</TableCell>
 
-			<TableCell width={120}>
+			<TableCell width={200}>
 				<TextField
 					size="small"
 					label="Preço Unitário"
@@ -208,19 +210,26 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 			</TableCell>
 
 			<TableCell width={80}>
-				{
-					price === undefined || quantity === undefined ? '-' : (
-						nToBRL(BRLToN(price) * quantity).split(/(\d+)/).map((part, i) =>
-							/\d+/.test(part) ? (
-								<Typography component="span" key={i} color="secondary" fontWeight={700}>
-									{part}
-								</Typography>
-							) : (
-								<span key={i}>{part}</span>
+				<Typography fontSize={11.5}>Total:</Typography>
+				<Typography fontSize={14} fontWeight={700}>
+					{
+						price === undefined || quantity === undefined ? '-' : (
+							nToBRL(BRLToN(price) * quantity).split(/(\d+)/).map((part, i) =>
+								/\d+/.test(part) ? (
+									<Typography component="span" key={i} color="secondary" fontWeight={700}>
+										{part}
+									</Typography>
+								) : (
+									<span key={i}>{part}</span>
+								)
 							)
 						)
-					)
-				}
+					}
+				</Typography>
+			</TableCell>
+
+			<TableCell width={80}>
+				<DeleteForeverOutlinedIcon color="error" sx={{ cursor: 'pointer' }} onClick={() => removeItem(row)} />
 			</TableCell>
 		</TableRow>
 	);

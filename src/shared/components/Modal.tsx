@@ -23,7 +23,7 @@ export interface IModalProps {
 	submit?: () => Promise<void>;
 	submitButtonProps?: IButtonProps;
 	ModalContent?: React.ReactNode;
-	maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+	maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number | string | false;
 }
 
 export const Modal: React.FC<IModalProps> = ({
@@ -42,7 +42,16 @@ export const Modal: React.FC<IModalProps> = ({
 	maxWidth = 'lg',
 	id = title,
 }) => {
+	const allowedSizes = ['xs', 'sm', 'md', 'lg', 'xl'];
+
 	const [loading, setLoading] = useState(false);
+
+	// Determine whether to let MUI handle maxWidth or apply a custom CSS maxWidth
+	const dialogMaxWidthProp = allowedSizes.includes(String(maxWidth)) ? (maxWidth as any) : false;
+	const paperStyle: any = { backgroundColor: '#fff' };
+	if (!allowedSizes.includes(String(maxWidth)) && maxWidth !== false) {
+		paperStyle.maxWidth = typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth;
+	}
 
 	const handleClose = () => {
 		onClose();
@@ -75,9 +84,10 @@ export const Modal: React.FC<IModalProps> = ({
 			open={open}
 			onClose={handleClose}
 			fullWidth={fullWidth}
-			maxWidth={maxWidth}
+			// let MUI handle known breakpoint sizes; otherwise disable and apply custom style
+			maxWidth={dialogMaxWidthProp}
 			sx={{
-				"& .MuiDialog-paper": { backgroundColor: "#fff" },
+				"& .MuiDialog-paper": paperStyle,
 			}}
 		>
 			<DialogTitle>{title}</DialogTitle>
