@@ -39,7 +39,7 @@ type TCached = { selected: ISelectedItem[], sup: { id: number, label: string } }
 export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId }) => {
 	const [prodSearch, setProdSearch] = useState("");
 	// SELECTED ITEMS
-	const selectedDefault = JSON.parse(sessionStorage.getItem(`purchase_edit_selected_${purchaseId}`) || '[]');
+	const selectedDefault = JSON.parse(localStorage.getItem(`purchase_edit_selected_${purchaseId}`) || '[]');
 	const [selected, setSelected] = useState<ISelectedItem[]>(selectedDefault);
 	const toggleSelect = (item: ISelectedItem) => {
 		setSelected((prev) => {
@@ -53,17 +53,17 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 	};
 
 	// SUPPLIERS
-	const supSelectedDefault = JSON.parse(sessionStorage.getItem(`purchase_edit_sup_${purchaseId}`) || '{ "id": -1, "label": "" }');
+	const supSelectedDefault = JSON.parse(localStorage.getItem(`purchase_edit_sup_${purchaseId}`) || '{ "id": -1, "label": "" }');
 	const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
 	const [supplierSelected, setSupplierSelected] = useState<{ id: number; label: string }>(supSelectedDefault);
 
 	const [loading, setLoading] = useState<boolean>(true);
 	async function getCached(suppliers: ISupplier[]) {
 		try {
-			const selectedCached = JSON.parse(sessionStorage.getItem(`purchase_edit_selected_${purchaseId}`) || 'null');
-			console.log(JSON.parse(sessionStorage.getItem(`purchase_edit_selected_${purchaseId}`) || 'null'));
+			const selectedCached = JSON.parse(localStorage.getItem(`purchase_edit_selected_${purchaseId}`) || 'null');
+			console.log(JSON.parse(localStorage.getItem(`purchase_edit_selected_${purchaseId}`) || 'null'));
 			console.log({ selectedCached });
-			const supCached = JSON.parse(sessionStorage.getItem(`purchase_edit_sup_${purchaseId}`) || 'null');
+			const supCached = JSON.parse(localStorage.getItem(`purchase_edit_sup_${purchaseId}`) || 'null');
 			const supSelect = supCached ? suppliers.find(sup => sup.id === supCached.id) : null;
 			console.log({ supSelect, selectedCached });
 			if (supSelect && selectedCached) {
@@ -111,15 +111,15 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 	}, [reloadKey]);
 
 	useEffect(() => {
-		sessionStorage.setItem(`purchase_edit_selected_${purchaseId}`, JSON.stringify(selected));
+		localStorage.setItem(`purchase_edit_selected_${purchaseId}`, JSON.stringify(selected));
 	}, [selected, purchaseId]);
 	useEffect(() => {
-		sessionStorage.setItem(`purchase_edit_sup_${purchaseId}`, JSON.stringify(supplierSelected));
+		localStorage.setItem(`purchase_edit_sup_${purchaseId}`, JSON.stringify(supplierSelected));
 	}, [supplierSelected, purchaseId]);
 
 	function clearCache() {
-		sessionStorage.removeItem(`purchase_edit_selected_${purchaseId}`);
-		sessionStorage.removeItem(`purchase_edit_sup_${purchaseId}`);
+		localStorage.removeItem(`purchase_edit_selected_${purchaseId}`);
+		localStorage.removeItem(`purchase_edit_sup_${purchaseId}`);
 		listReloadEvent.emit('purchase_list');
 		setReloadKey(prev => prev + 1);
 	}

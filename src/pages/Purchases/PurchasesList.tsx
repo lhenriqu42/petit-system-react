@@ -89,7 +89,7 @@ export const PurchasesList: React.FC = () => {
 						CustomTableRow={
 							({ row }) => {
 
-								const someCache = sessionStorage.getItem(`purchase_edit_selected_${row.id}`) || sessionStorage.getItem(`purchase_edit_sup_${row.id}`);
+								const someCache = localStorage.getItem(`purchase_edit_selected_${row.id}`) || localStorage.getItem(`purchase_edit_sup_${row.id}`);
 								const isEditing: boolean = !!someCache;
 								return (
 									<TableRow
