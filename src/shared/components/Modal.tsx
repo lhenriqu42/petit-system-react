@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import './../../shared/css/sweetAlert.css';
 import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import { modalCloseEvent } from '../events/modalEvents';
-
+import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 interface IButtonProps {
 	Text: string;
 	variant?: "text" | "outlined" | "contained";
@@ -90,7 +90,12 @@ export const Modal: React.FC<IModalProps> = ({
 				"& .MuiDialog-paper": paperStyle,
 			}}
 		>
-			<DialogTitle>{title}</DialogTitle>
+			<DialogTitle sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+				<Box>{title}</Box>
+				<Box height={20} width={20} onClick={handleClose} sx={{ cursor: 'pointer' }}>
+					<ClearOutlinedIcon sx={{ color: 'GrayText', '&:hover': { color: 'black' } }} />
+				</Box>
+			</DialogTitle>
 			<DialogContent>
 				<Box py={py} px={px} p={p}>
 					<Typography component="div">
