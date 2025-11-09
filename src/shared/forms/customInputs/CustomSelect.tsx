@@ -5,6 +5,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { FormHelperText } from '@mui/material';
+import { useDeepEffect } from '../../hooks';
 
 interface IBorderColor {
 	normal?: string,
@@ -48,7 +49,7 @@ export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaul
 		onValueChange?.(event.target.value);
 	};
 
-	useEffect(() => {
+	useDeepEffect(() => {
 		if (defaultSelected !== undefined) {
 			if (defaultSelected >= 0 && defaultSelected < menuItens.length) {
 				setValue(menuItens[defaultSelected].value);
