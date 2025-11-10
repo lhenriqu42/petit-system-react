@@ -229,7 +229,7 @@ export const CreateModalContent: React.FC = () => {
 			purchases: selected.map(item => ({
 				type: item.data.mode,
 				prod_id: item.prod_id,
-				pack_id: item.data.pack_id,
+				pack_id: item.data.mode === 'PACK' ? item.data.pack_id : undefined,
 				quantity: item.data.quantity,
 				price: BRLToN(item.data.price)
 			}))

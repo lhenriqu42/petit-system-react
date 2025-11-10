@@ -28,6 +28,7 @@ import { EditModalContent } from "./Modals/ModalEdit";
 import { listReloadEvent } from "../../shared/events/listEvents";
 import Swal from "sweetalert2";
 import { ViewModalContent } from "./Modals/ModalView";
+import { modalCloseEvent } from "../../shared/events/modalEvents";
 
 
 export const PurchasesList: React.FC = () => {
@@ -143,8 +144,9 @@ export const PurchasesList: React.FC = () => {
 										<TableCell>
 											<ModalFab
 												size="medium"
-												backgroundColor={{default: '#5bc0de', hover: '#6fd8ef'}}
+												backgroundColor={{ default: '#5bc0de', hover: '#6fd8ef' }}
 												modalProps={{
+													submit: async () => modalCloseEvent.emit({ modalId: 'purchase_view_modal' }),
 													id: 'purchase_view_modal',
 													p: 0,
 													maxWidth: '70%',

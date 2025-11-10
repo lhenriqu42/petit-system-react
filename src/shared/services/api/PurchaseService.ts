@@ -37,13 +37,6 @@ export interface IPurchaseGetAllResponse {
 
 
 const create = async (body: IPurchaseCreateBody): Promise<number | Error> => {
-	body.purchases = body.purchases.map((item) => {
-		const pack_id = item.type === 'PACK' ? item.pack_id : undefined;
-		return {
-			...item,
-			pack_id,
-		};
-	});
 	try {
 		const { data } = await Api.post('/purchase', body, Autorization());
 
