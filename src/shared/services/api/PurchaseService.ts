@@ -95,6 +95,8 @@ export interface IPurchaseDetails {
 			pack_id: number | null;
 			pack_quantity?: number | null;
 
+			pack_deleted_qnt?: number | null; // Will be present if type is 'PACK' and the pack has been deleted
+
 		}[];
 	};
 }
@@ -134,10 +136,20 @@ const update = async (purchaseId: number, body: IPurchaseCreateBody): Promise<nu
 	}
 };
 
+const cancelPurchase = async (purchaseId: number): Promise<void> => {
+	try {
+		await Api.delete(`/purchase/${purchaseId}`, Autorization());
+	} catch (error) {
+		console.error(error);
+		throw new Error((error as { message: string }).message || 'Erro ao cancelar a compra.');
+	}
+};
+
 export const PurchaseService = {
 	create,
 	update,
 	getAll,
 	getDetails,
+	cancelPurchase,
 	completePurchase,
 };

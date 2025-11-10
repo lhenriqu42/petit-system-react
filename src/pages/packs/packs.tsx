@@ -24,8 +24,7 @@ import { listReloadEvent } from "../../shared/events/listEvents";
 import { ListArray } from "../../shared/components/ListArray";
 import Swal from "sweetalert2";
 import { modalCloseEvent } from "../../shared/events/modalEvents";
-
-
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 export const Packs: React.FC = () => {
 
 	const [mode, setMode] = useState<"Produtos" | "Embalagens">("Embalagens");
@@ -116,7 +115,7 @@ export const Packs: React.FC = () => {
 				title: 'Sucesso',
 				text: 'Relação realizada com sucesso!',
 				willClose: () => {
-					modalCloseEvent.emit({modalId: "*"});
+					modalCloseEvent.emit({ modalId: "*" });
 					listReloadEvent.emit('*');
 					setProdSearch("");
 				}
@@ -184,6 +183,55 @@ export const Packs: React.FC = () => {
 		}
 	};
 
+	// DELETAR EMBALAGEM
+	const handleDelete = async (pack_id: number, description: string) => {
+		let timerInterval: number;
+		const result = await Swal.fire({
+			title: 'Excluir Embalagem',
+			html: '<b>Isso irá remover todos os relacionamentos associados.</b><br>Tem certeza que deseja excluir a <br><strong>' + description + '</strong>?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+			cancelButtonText: 'Cancelar',
+			didOpen: () => {
+				const confirmButton = Swal.getConfirmButton();
+				if (confirmButton) {
+					confirmButton.disabled = true; // Desabilita o botão inicialmente
+
+					let timeLeft = 5;
+					confirmButton.textContent = `Prosseguir (${timeLeft})`;
+
+					timerInterval = window.setInterval(() => {
+						timeLeft--;
+						confirmButton.textContent = `Prosseguir (${timeLeft})`;
+
+						if (timeLeft === 0) {
+							clearInterval(timerInterval);
+							confirmButton.textContent = 'Prosseguir';
+							confirmButton.disabled = false; // Habilita o botão após o timer
+						}
+					}, 1000);
+				}
+			},
+			willClose: () => {
+				clearInterval(timerInterval); // Limpa o intervalo quando o modal fechar
+			}
+		})
+		if (result.isConfirmed) {
+			try {
+				setPackSelected(undefined);
+				await PackService.deleteById(pack_id);
+				Swal.fire({
+					icon: 'success',
+					title: 'Sucesso',
+					text: 'Embalagem excluída com sucesso!',
+				});
+				listReloadEvent.emit('*');
+			} catch (error) {
+				alert(error);
+			}
+		}
+	};
 
 	return (
 		<>
@@ -258,7 +306,7 @@ export const Packs: React.FC = () => {
 													id="prod-list"
 													itemsPerPage={8}
 													height={470}
-													filters={{search: prodSearch, orderByStock: false}}
+													filters={{ search: prodSearch, orderByStock: false }}
 													apiCall={ProductService.getAll}
 													CustomTableRow={({ row }) => (
 														<TableRow hover sx={{ cursor: 'pointer' }} onClick={() => setProdSelected(row)} selected={prodSelected && row.id === prodSelected.id}>
@@ -277,6 +325,9 @@ export const Packs: React.FC = () => {
 													CustomTableRow={({ row }) => (
 														<TableRow hover sx={{ cursor: 'pointer' }} onClick={() => setPackSelected(row)} selected={packSelected && row.id === packSelected.id}>
 															<TableCell>{row.description}</TableCell>
+															<TableCell align="right">
+																<DeleteOutlinedIcon onClick={() => handleDelete(row.id, row.description)} fontSize="small" sx={{ mr: 0.5, mb: -0.3, color: '#a00', '&:hover': { color: '#e00' } }} />
+															</TableCell>
 														</TableRow>
 													)}
 												/>
@@ -331,7 +382,7 @@ export const Packs: React.FC = () => {
 											id="packs-by-prod-list"
 											minHeight={575}
 											itemsPerPage={9}
-											filters={{ prod_id: prodSelected.id}}
+											filters={{ prod_id: prodSelected.id }}
 											apiCall={PackService.getPacksByProd}
 											CustomTableRowHeader={() => (
 												<TableRow>

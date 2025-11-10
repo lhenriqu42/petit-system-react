@@ -66,6 +66,29 @@ export const PurchasesList: React.FC = () => {
 		});
 	}
 
+	const cancelPurchase = async (purchaseId: number, supplier_name: string) => {
+		const result = await Swal.fire({
+			title: 'Cancelar Pedido',
+			html: `Fornecedor: <b>${supplier_name.toUpperCase()}</b><br><br>Tem certeza que deseja cancelar o pedido?`,
+			showCancelButton: true,
+			confirmButtonColor: '#d33',
+		});
+
+		if (result.isConfirmed) {
+			try {
+				await PurchaseService.cancelPurchase(purchaseId);
+				listReloadEvent.emit('purchase_list', { page: 'current' });
+			} catch {
+				Swal.fire(
+					'Erro',
+					'Ocorreu um erro ao cancelar o pedido. Por favor, tente novamente.',
+					'error'
+				);
+				return;
+			}
+		}
+	}
+
 	return (
 		<>
 			<LayoutMain title="Pedidos" subTitle={"Gerencie os pedidos de produtos"}>
@@ -87,6 +110,7 @@ export const PurchasesList: React.FC = () => {
 						</ModalButton>
 						<Box display="flex" alignItems="center" gap={1}>
 							<Button
+								disabled
 								variant="contained"
 								color="warning"
 								startIcon={<CodeIcon />}
@@ -98,6 +122,7 @@ export const PurchasesList: React.FC = () => {
 								Importar XML
 							</Button>
 							<Button
+								disabled
 								variant="contained"
 								startIcon={<AssignmentIcon />}
 							>
@@ -210,6 +235,7 @@ export const PurchasesList: React.FC = () => {
 															<Fab
 																size="medium"
 																color="error"
+																onClick={() => { cancelPurchase(row.id, row.supplier_name) }}
 															>
 																<BlockIcon />
 															</Fab>

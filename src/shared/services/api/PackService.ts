@@ -170,6 +170,15 @@ const removePacksFromProd = async ({ prod_id, packs }: { prod_id: number, packs:
 	}
 }
 
+const deleteById = async (id: number): Promise<void> => {
+	try {
+		await Api.delete(`/pack/${id}`, Autorization());
+	} catch (error) {
+		console.error(error);
+		throw new Error((error as { message: string }).message || 'Erro ao excluir o registro.');
+	}
+};
+
 export const PackService = {
 	create,
 	getAll,
@@ -180,4 +189,5 @@ export const PackService = {
 	removeProdsFromPack,
 	removePacksFromProd,
 	getAllProducts,
+	deleteById,
 };
