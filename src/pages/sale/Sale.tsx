@@ -18,6 +18,7 @@ import {
 	Dialog,
 	DialogTitle,
 	DialogContent,
+	Slider,
 } from "@mui/material";
 import Swal from 'sweetalert2'
 import { useNavigate } from "react-router-dom";
@@ -333,6 +334,18 @@ export const Sale: React.FC = () => {
 		setCalcValue(0);
 	}
 
+
+	const fontSizeCached = () => {
+		const cached = localStorage.getItem('totalSaleFontSize');
+		if (cached) {
+			return Number(cached);
+		}
+		return 18;
+	}
+	const [fontSize, setFontSize] = useState(fontSizeCached());
+	useEffect(() => {
+		localStorage.setItem('totalSaleFontSize', fontSize.toString());
+	}, [fontSize]);
 	return (
 		<LayoutMain title="Vender" subTitle="">
 			<Grid container spacing={2}>
@@ -437,7 +450,7 @@ export const Sale: React.FC = () => {
 								inputFocus();
 							}}
 						/>
-						<Box display={'flex'} gap={38} marginTop={3}>
+						<Box display={'flex'} marginTop={3} alignItems={'center'} justifyContent={'space-between'}>
 							<Button
 								variant="contained"
 								sx={{ mb: 2, ml: 3 }}
@@ -446,7 +459,16 @@ export const Sale: React.FC = () => {
 							>
 								<AddShoppingCartRoundedIcon sx={{ mr: 1 }} /> Finalizar
 							</Button>
-							<Typography variant="h6">Total: {nToBRL(totalPrice)}</Typography>
+							<Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} gap={5} width={400} mb={2} mr={3}>
+								<Typography width={300} variant="h6" fontSize={fontSize}>Total: {nToBRL(totalPrice)}</Typography>
+								<Slider
+									sx={{ width: 200 }}
+									value={fontSize}
+									min={18}
+									max={32}
+									onChange={(_, newValue) => setFontSize(newValue as number)}
+								/>
+							</Box>
 						</Box>
 					</Paper>
 				</Grid>
