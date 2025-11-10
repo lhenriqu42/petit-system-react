@@ -459,13 +459,13 @@ export const Sale: React.FC = () => {
 							>
 								<AddShoppingCartRoundedIcon sx={{ mr: 1 }} /> Finalizar
 							</Button>
-							<Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} gap={5} width={450} mb={2} mr={3}>
+							<Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} gap={5} width={530} mb={2} mr={3}>
 								<Typography width={400} variant="h6" fontSize={fontSize}>Total: {nToBRL(totalPrice)}</Typography>
 								<Slider
 									sx={{ width: 200 }}
 									value={fontSize}
 									min={18}
-									max={32}
+									max={40}
 									onChange={(_, newValue) => setFontSize(newValue as number)}
 								/>
 							</Box>

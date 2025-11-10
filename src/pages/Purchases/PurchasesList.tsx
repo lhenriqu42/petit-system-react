@@ -77,6 +77,8 @@ export const PurchasesList: React.FC = () => {
 		if (result.isConfirmed) {
 			try {
 				await PurchaseService.cancelPurchase(purchaseId);
+				localStorage.removeItem(`purchase_edit_selected_${purchaseId}`);
+				localStorage.removeItem(`purchase_edit_sup_${purchaseId}`);
 				listReloadEvent.emit('purchase_list', { page: 'current' });
 			} catch {
 				Swal.fire(

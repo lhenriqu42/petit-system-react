@@ -18,11 +18,13 @@ import { format } from 'date-fns';
 import { useDebounce } from '../../../shared/hooks';
 import { LayoutMain } from "../../../shared/layouts";
 import { useEffect, useMemo, useState } from "react";
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { Link, useSearchParams } from "react-router-dom";
 import { Environment } from "../../../shared/environment";
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import { FincashService, IFincash, OutflowService } from "../../../shared/services/api";
 import { nToBRL } from "../../../shared/services/formatters";
+import Swal from "sweetalert2";
 
 const NUMBER_OF_SKELETONS = Array(7).fill(null);
 
@@ -105,7 +107,6 @@ export const AllFincashs: React.FC = () => {
 
 			const fincashs = result.data;
 			const fincashOpen = await FincashService.getOpenFincash();
-
 			if (!(fincashOpen instanceof Error)) {
 				const total = await FincashService.getTotalByFincash(fincashOpen.id);
 				if (!(total instanceof Error)) {
@@ -150,6 +151,35 @@ export const AllFincashs: React.FC = () => {
 		}
 		setErros(erros);
 		setErrorLoading(false);
+	}
+
+	const reOpenFincash = async (fincashId: number) => {
+		if (fincashOpen) {
+			return Swal.fire({
+				title: 'Ação não permitida',
+				text: 'Já existe um caixa aberto! Feche o caixa atual antes de reabrir outro.',
+			});
+		}
+		const response = await Swal.fire({
+			title: 'Reabrir caixa',
+			text: 'Tem certeza que deseja reabrir este caixa?',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			cancelButtonText: 'Cancelar',
+			confirmButtonText: 'Sim, reabrir'
+		});
+
+		if (response.isConfirmed) {
+			try {
+				await FincashService.reOpenFincash(fincashId);
+				listFincashs();
+			} catch (error) {
+				const errorMessage = (error as { message: string }).message || 'Erro ao reabrir o caixa.';
+				return Swal.fire('Erro', errorMessage, 'error');
+			}
+		}
 	}
 
 	return (
@@ -259,24 +289,37 @@ export const AllFincashs: React.FC = () => {
 														</TableCell>
 													}
 													<TableCell>
-														<Box display={'flex'}>
-															<Link to={'/caixa/' + row.id + '?backPage=' + page}>
-																<Fab
-																	size="medium"
-																	color="info"
-																	onClick={() => console.log('Clique no ícone')}
-																	sx={{
-																		backgroundColor: '#5bc0de',
-																		'&:hover': { backgroundColor: '#6fd8ef' },
-																	}}
-																>
-																	<VisibilityRoundedIcon color="info" />
-																</Fab>
-															</Link>
+														<Box display={'flex'} gap={1} alignItems={'center'}>
 															{
-																!row.cardValue &&
-																<Box height={10} width={10} borderRadius={90} sx={{ backgroundColor: EErrorsColor.CardlessError }} />
+																row.isFinished &&
+																<Box>
+																	<Fab
+																		size="medium"
+																		color="warning"
+																		onClick={() => reOpenFincash(row.id)}
+																	>
+																		<LockOpenIcon color="info" />
+																	</Fab>
+																</Box>
 															}
+															<Box display={'flex'}>
+																<Link to={'/caixa/' + row.id + '?backPage=' + page}>
+																	<Fab
+																		size="medium"
+																		color="info"
+																		sx={{
+																			backgroundColor: '#5bc0de',
+																			'&:hover': { backgroundColor: '#6fd8ef' },
+																		}}
+																	>
+																		<VisibilityRoundedIcon color="info" />
+																	</Fab>
+																</Link>
+																{
+																	!row.cardValue &&
+																	<Box height={10} width={10} borderRadius={90} sx={{ backgroundColor: EErrorsColor.CardlessError }} />
+																}
+															</Box>
 														</Box>
 													</TableCell>
 													{

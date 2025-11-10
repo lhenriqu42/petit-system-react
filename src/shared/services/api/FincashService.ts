@@ -328,6 +328,15 @@ const updateById = async (id: number, dados: IFincashUpdate): Promise<void | Err
 //     }
 // };
 
+const reOpenFincash = async (funcash_id: number): Promise<void> => {
+	try {
+		await Api.put<IFincash>(`/fincash/reopen/${funcash_id}`, {}, Autorization());
+	} catch (error) {
+		console.error(error);
+		throw new Error((error as { message: string }).message || 'Erro ao reabrir o caixa.');
+	}
+};
+
 
 export const FincashService = {
     finish,
@@ -345,4 +354,5 @@ export const FincashService = {
     getSaleDataByFincash,
     //     updateById,
     //     deleteById,
+	reOpenFincash,
 };
