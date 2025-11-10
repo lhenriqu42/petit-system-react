@@ -1,30 +1,34 @@
 import {
 	Box,
+	Alert,
 	Paper,
+	Button,
 	TableRow,
 	TableCell,
 	TextField,
 	Typography,
-	Button,
-	Alert,
 } from "@mui/material";
-import DeleteIcon from '@mui/icons-material/Delete';
+import Swal from "sweetalert2";
 import AddIcon from '@mui/icons-material/Add';
+import { LayoutMain } from "../../shared/layouts";
+import DeleteIcon from '@mui/icons-material/Delete';
 import CategoryIcon from '@mui/icons-material/Category';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import { LayoutMain } from "../../shared/layouts";
-import { IProduct, ProductService, PackService } from "../../shared/services/api";
-import { GetAllFunction, ListItems } from "../../shared/components/ListItems";
-import { ModalButton } from "../../shared/components/ModalButton";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CustomTextField } from "../../shared/forms/customInputs/CustomTextField";
-import { CustomButtonGroup } from "../../shared/forms/customInputs/CustomButtonGroup";
-
-import { listReloadEvent } from "../../shared/events/listEvents";
 import { ListArray } from "../../shared/components/ListArray";
-import Swal from "sweetalert2";
+import { listReloadEvent } from "../../shared/events/listEvents";
+import { ModalButton } from "../../shared/components/ModalButton";
 import { modalCloseEvent } from "../../shared/events/modalEvents";
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import { GetAllFunction, ListItems } from "../../shared/components/ListItems";
+import { IProduct, ProductService, PackService } from "../../shared/services/api";
+import { CustomTextField } from "../../shared/forms/customInputs/CustomTextField";
+import { CustomButtonGroup } from "../../shared/forms/customInputs/CustomButtonGroup";
+import { CreatePackModal } from "./CreateModal";
+
+
+
+
 export const Packs: React.FC = () => {
 
 	const [mode, setMode] = useState<"Produtos" | "Embalagens">("Embalagens");
@@ -47,32 +51,6 @@ export const Packs: React.FC = () => {
 	useEffect(() => {
 		setProdSearch("");
 	}, [mode]);
-
-
-	// CRIAR UMA EMBALAGEM NOVA
-	const [createPackForm, setCreatePackForm] = useState<{ quantity: number }>({ quantity: 0 });
-	const [createAlert, setCreateAlert] = useState<{ message: string, color: 'error' | 'warning' | 'success' } | null>(null);
-	const [createLoading, setCreateLoading] = useState(false);
-	const createPack = async () => {
-		if (createPackForm.quantity <= 0)
-			return setCreateAlert({ message: 'A quantidade deve ser maior que zero.', color: 'warning' });
-		setCreateAlert(null);
-		setCreateLoading(true);
-		try {
-			const response = await PackService.create({ prod_qnt: createPackForm.quantity });
-			if (response instanceof Error) {
-				throw response;
-			}
-			setCreateAlert({ message: 'Embalagem criada com sucesso!', color: 'success' });
-			listReloadEvent.emit('*');
-
-		} catch (error: any) {
-			return setCreateAlert({ message: 'Já existe uma embalagem com essa quantidade.', color: 'error' });
-		} finally {
-			setCreateLoading(false);
-		}
-	}
-
 
 
 
@@ -257,45 +235,7 @@ export const Packs: React.FC = () => {
 										<Typography mb={1} pt={1}>{mode}</Typography>
 										{
 											mode === "Embalagens" &&
-											<ModalButton
-												startIcon={<AddIcon />}
-												onClose={() => {
-													setCreateAlert(null);
-													setCreatePackForm({ quantity: 0 });
-												}}
-												modalProps={{
-													maxWidth: 'xs',
-													submitButton: false,
-													title: 'Adicionar Embalagem',
-													ModalContent: (
-														<Box display="flex" flexDirection="column" gap={1} border={1} borderColor={'#ccc'} p={2} borderRadius={2}>
-															<Typography variant="subtitle1">Informações da Embalagem</Typography>
-															{createAlert && <Alert severity={createAlert.color}>{createAlert.message}</Alert>}
-															<Box display="flex" alignItems="center" justifyContent={'space-between'}>
-																<CustomTextField
-																	unsigned
-																	onChange={(e) => setCreatePackForm({ ...createPackForm, quantity: Number(e.target.value) })}
-																	margin="dense"
-																	type="number"
-																	size="small"
-																	name="quantity"
-																	label="Quantidade"
-																	sx={{ width: 150 }}
-																/>
-																<Button variant="contained"
-																	sx={{ height: 40, mt: 0.4, width: 80 }}
-																	onClick={createPack}
-																	disabled={createLoading}
-																>
-																	<AddIcon />
-																</Button>
-															</Box>
-														</Box>
-													),
-												}}
-											>
-												Nova Embalagem
-											</ModalButton>
+											<CreatePackModal />
 										}
 									</Box>
 									{
@@ -531,7 +471,10 @@ export function ModalRelacionar<TData, TFilter = undefined>({ apiCall, itemSelec
 			<Box display="flex" flexDirection="column" gap={1} border={2} borderColor={'#555'} p={2} borderRadius={2} width={'50%'}>
 				<Box mb={1}>
 					<Typography variant="subtitle1">{mode === 'prod' ? 'Selecione os Produtos que deseja relacionar com a Embalagem:' : 'Selecione as Embalagens que deseja relacionar com o Produto:'}</Typography>
-					<Typography variant="h6" color="primary" fontWeight={650}>{itemSelectedName}</Typography>
+					<Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+						<Typography variant="h6" color="primary" fontWeight={650}>{itemSelectedName}</Typography>
+						<CreatePackModal />
+					</Box>
 				</Box>
 				<Box border={1} borderColor={'#ccc'} borderRadius={2} height={450} pb={3}>
 					{

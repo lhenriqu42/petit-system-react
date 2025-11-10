@@ -142,13 +142,13 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 										startIcon={<InventoryIcon />}
 										size="small"
 										modalProps={{
-											submit: () => submitRelacionar('Relacionar Embalagens'),
+											submit: () => submitRelacionar('packs-to-relate-modal'),
 											submitButtonProps: { Text: 'Relacionar' },
 											title: 'Relacionar Embalagens',
 											ModalContent: (
 												<ModalRelacionar
 													mode="pack"
-													id="Relacionar Embalagens"
+													id="packs-to-relate-modal"
 													apiCall={PackService.getAll}
 													itemSelectedName={row.prod_name}
 													onChange={(selected) => setRelacionarSelected([...selected].map(([id, _]) => id))}
