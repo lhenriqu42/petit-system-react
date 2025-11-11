@@ -18,7 +18,8 @@ export interface IProduct {
     quantity?: number;
     created_at: Date,
     updated_at: Date,
-    deleted_at?: Date
+    deleted_at?: Date,
+	stock?: number,
 
 }
 
@@ -63,9 +64,9 @@ interface IProdOutputResponse {
     totalCount: number,
 }
 
-const getAll = async (page = 1, filter = '', limit = Environment.LIMITE_DE_LINHAS): Promise<TProductTotalCount | Error> => {
+const getAll = async (page = 1, limit = Environment.LIMITE_DE_LINHAS,  filter = {search: '', orderByStock: false}): Promise<TProductTotalCount | Error> => {
     try {
-        const urlRelativa = `/product?page=${page}&limit=${limit}&filter=${filter}`;
+        const urlRelativa = `/product?page=${page}&limit=${limit}&filter=${filter.search}&orderByStock=${filter.orderByStock}`;
         const { data, headers } = await Api.get(urlRelativa, Autorization());
         if (data) {
             return {

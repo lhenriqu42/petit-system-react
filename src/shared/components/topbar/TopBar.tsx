@@ -1,10 +1,21 @@
-import { Avatar, Badge, IconButton, Menu, MenuItem, Stack, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material';
+import {
+	// Badge,
+	// Tooltip,
+	Avatar,
+	IconButton,
+	Menu,
+	MenuItem,
+	Stack,
+	Typography,
+	useMediaQuery,
+	useTheme
+} from '@mui/material';
 
 // ICONS
 // import SearchIcon from '@mui/icons-material/Search';
 // import PersonIcon from '@mui/icons-material/Person';
 import MenuIcon from '@mui/icons-material/Menu';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+// import NotificationsIcon from '@mui/icons-material/Notifications';
 
 
 import { useState } from 'react';
@@ -72,7 +83,7 @@ export const TopBar: React.FC = () => {
 						spacing={5}
 					>
 
-						<Tooltip title="Notificações">
+						{/* <Tooltip title="Notificações">
 							<IconButton>
 								<Badge
 									badgeContent={4}
@@ -84,7 +95,7 @@ export const TopBar: React.FC = () => {
 
 								</Badge>
 							</IconButton>
-						</Tooltip>
+						</Tooltip> */}
 						<Avatar
 							onClick={handleOpenUserMenu}
 							sx={{

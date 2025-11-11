@@ -230,7 +230,7 @@ export const FincashDetail: React.FC = () => {
 					{
 						fincash?.isFinished &&
 						<Link to={`/caixa/editar/${id}?backPage=${backPage}`}>
-							<Button variant="contained"> <EditIcon sx={{ mr: 1 }} /> Editar Caixa </Button>
+							<Button variant="contained" color="warning"> <EditIcon sx={{ mr: 1 }} /> Editar Caixa </Button>
 						</Link>
 					}
 				</Box>
