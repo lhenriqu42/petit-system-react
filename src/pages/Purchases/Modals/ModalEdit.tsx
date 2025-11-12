@@ -37,10 +37,12 @@ export interface ISelectedItemData {
 type TCached = { selected: ISelectedItem[], sup: { id: number, label: string } };
 
 export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId }) => {
+	useEffect(() => {
+		// console.log('✅COMPONENTE MONTADO');
+	}, []);
 	const [prodSearch, setProdSearch] = useState("");
 	// SELECTED ITEMS
-	const selectedDefault = JSON.parse(localStorage.getItem(`purchase_edit_selected_${purchaseId}`) || '[]');
-	const [selected, setSelected] = useState<ISelectedItem[]>(selectedDefault);
+	const [selected, setSelected] = useState<ISelectedItem[]>([]);
 	const toggleSelect = (item: ISelectedItem) => {
 		setSelected((prev) => {
 			const exists = prev.find((i) => i.prod_id === item.prod_id);
@@ -53,22 +55,23 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 	};
 
 	// SUPPLIERS
-	const supSelectedDefault = JSON.parse(localStorage.getItem(`purchase_edit_sup_${purchaseId}`) || '{ "id": -1, "label": "" }');
 	const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
-	const [supplierSelected, setSupplierSelected] = useState<{ id: number; label: string }>(supSelectedDefault);
+	const [supplierSelected, setSupplierSelected] = useState<{ id: number; label: string }>({ id: -1, label: "" });
 
 	const [loading, setLoading] = useState<boolean>(true);
 	async function getCached(suppliers: ISupplier[]) {
+		// console.log('Buscando cache para compra ID:', purchaseId);
 		try {
 			const selectedCached = JSON.parse(localStorage.getItem(`purchase_edit_selected_${purchaseId}`) || 'null');
-			console.log(JSON.parse(localStorage.getItem(`purchase_edit_selected_${purchaseId}`) || 'null'));
-			console.log({ selectedCached });
+			// // console.log(JSON.parse(localStorage.getItem(`purchase_edit_selected_${purchaseId}`) || 'null'));
+			// // console.log({ selectedCached });
 			const supCached = JSON.parse(localStorage.getItem(`purchase_edit_sup_${purchaseId}`) || 'null');
 			const supSelect = supCached ? suppliers.find(sup => sup.id === supCached.id) : null;
-			console.log({ supSelect, selectedCached });
+			// console.log({ supSelect, selectedCached });
 			if (supSelect && selectedCached) {
 				return { selected: selectedCached, sup: { id: supSelect.id, label: supSelect.name } };
 			}
+			// console.log("🟡 Cache incompleto — buscando da API...");
 			const result = await PurchaseService.getDetails(purchaseId);
 			const selectedItems: ISelectedItem[] = result.items_summary.items.map(item => ({
 				prod_id: item.prod_id,
@@ -82,6 +85,7 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 			}));
 			const sup = suppliers.find(sup => sup.id === result.supplier.id);
 			if (!sup) throw new GetDetailsError('Fornecedor da compra não encontrado. Compra corrompida!');
+			// console.log("🟢 Fetch completo, sup:", sup);
 			return { selected: selectedItems, sup: { id: sup.id, label: sup.name } };
 		} catch (error) {
 			console.error(error);
@@ -91,13 +95,16 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 	}
 	const [reloadKey, setReloadKey] = useState<number>(0);
 	useEffect(() => {
+		// console.log('Carregando dados para edição...', { reloadKey });
 		const fetchData = async () => {
 			try {
 				const sups = await SupplierService.getAll(undefined, undefined, 999999);
 				if (sups instanceof Error) throw sups;
+				// console.log('Fornecedores carregados:', sups.data.length);
 				setSuppliers(sups.data);
 				const cached: TCached | null = await getCached(sups.data);
 				if (cached === null) return;
+				// console.log('setting supplierSelected with:', cached.sup);
 				setSupplierSelected(cached.sup);
 				setSelected(cached.selected);
 			} catch (error) {
@@ -111,13 +118,18 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 	}, [reloadKey]);
 
 	useEffect(() => {
+		if (!selected || selected.length === 0) return // console.log('💾❌! selected is empty:', selected);
+		// console.log('💾 Salvando selected no localStorage:', selected);
 		localStorage.setItem(`purchase_edit_selected_${purchaseId}`, JSON.stringify(selected));
 	}, [selected, purchaseId]);
 	useEffect(() => {
+		if (!supplierSelected || supplierSelected.id == -1) return // console.log('💾❌! supplierSelected: ', supplierSelected);
+		// console.log('💾 Salvando supplierSelected no localStorage:', supplierSelected);
 		localStorage.setItem(`purchase_edit_sup_${purchaseId}`, JSON.stringify(supplierSelected));
 	}, [supplierSelected, purchaseId]);
 
 	function clearCache() {
+		// console.log('🧹 Limpando cache para compra ID:', purchaseId);
 		localStorage.removeItem(`purchase_edit_selected_${purchaseId}`);
 		localStorage.removeItem(`purchase_edit_sup_${purchaseId}`);
 		listReloadEvent.emit('purchase_list', { page: 'current' });
@@ -212,7 +224,7 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 	const renderRow = useCallback(
 		({ row }: { row: ISelectedItem }) => {
 			const selected = selectedRef.current.find((i) => i.prod_id === row.prod_id);
-			// console.log('Rendering row for prod_id:', row.prod_id, 'with selected data:', selected);
+			// // console.log('Rendering row for prod_id:', row.prod_id, 'with selected data:', selected);
 			return (
 				selected &&
 				<CustomRow
@@ -289,7 +301,7 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 				title: 'Sucesso',
 				text: 'Compra editada com sucesso.',
 				willClose: () => {
-					modalCloseEvent.emit({ modalId: 'purchase_edit_modal'});
+					modalCloseEvent.emit({ modalId: 'purchase_edit_modal' });
 					clearCache();
 					listReloadEvent.emit('purchase_list', { page: 'current' });
 					setSelected([]);
@@ -315,7 +327,7 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 					<>
 						<Box width={"34%"}>
 							<CustomAutoComplete
-								callback={setSupplierSelected}
+								callback={(target) => { if (target.id !== -1) setSupplierSelected(target) }}
 								size="small"
 								label="Fornecedor"
 								options={suppliers.map(sup => ({ id: sup.id, label: sup.name }))}
@@ -415,8 +427,3 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 		</Box >
 	);
 };
-
-
-
-
-

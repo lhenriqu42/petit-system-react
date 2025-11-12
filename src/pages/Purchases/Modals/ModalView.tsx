@@ -141,7 +141,7 @@ export const ViewModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 													</TableRow>
 												)}
 												CustomTableRow={({ row }) => {
-													const pack_qnt = row.pack_deleted_qnt ?? row.pack_quantity ?? row.quantity;
+													const pack_qnt = row.pack_deleted_qnt ?? row.pack_quantity ?? 1;
 													const realQnt = row.quantity * pack_qnt;
 													const unitCost = (row.pricetotal / realQnt);
 													const profitPercentage = ((row.prod_price - unitCost) / row.prod_price) * 100;
