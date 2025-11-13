@@ -118,12 +118,12 @@ export const EditModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 	}, [reloadKey]);
 
 	useEffect(() => {
-		if (!selected || selected.length === 0) return // console.log('💾❌! selected is empty:', selected);
+		if (loading) return // console.log('💾❌! selected is empty:', selected);
 		// console.log('💾 Salvando selected no localStorage:', selected);
 		localStorage.setItem(`purchase_edit_selected_${purchaseId}`, JSON.stringify(selected));
 	}, [selected, purchaseId]);
 	useEffect(() => {
-		if (!supplierSelected || supplierSelected.id == -1) return // console.log('💾❌! supplierSelected: ', supplierSelected);
+		if (loading) return // console.log('💾❌! supplierSelected: ', supplierSelected);
 		// console.log('💾 Salvando supplierSelected no localStorage:', supplierSelected);
 		localStorage.setItem(`purchase_edit_sup_${purchaseId}`, JSON.stringify(supplierSelected));
 	}, [supplierSelected, purchaseId]);
