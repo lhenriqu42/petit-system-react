@@ -1,5 +1,6 @@
 export * from './SaleService';
 export * from './PackService';
+export * from './UserService';
 export * from './StockService';
 export * from './GroupService';
 export * from './ProductService';
@@ -10,3 +11,4 @@ export * from './SupplierService';
 export * from './ValidityService';
 export * from './PurchaseService';
 export * from './Auth/AuthService';
+export * from './SupProdMapService';
