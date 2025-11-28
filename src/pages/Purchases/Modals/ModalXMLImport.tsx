@@ -17,9 +17,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { ModalButton } from "../../../shared/components/ModalButton";
 import { useDeepEffect } from "../../../shared/hooks";
 import InventoryIcon from '@mui/icons-material/Inventory';
-import { modalCloseEvent } from "../../../shared/events/modalEvents";
-import { listReloadEvent } from "../../../shared/events/listEvents";
-import { ModalRelacionar } from "../../packs/packs";
+import { useAssignModalProps } from "../../packs/RelateModal";
 
 const VisuallyHiddenInput = styled('input')({
 	clip: 'rect(0 0 0 0)',
@@ -145,6 +143,7 @@ export const ModalXMLImport: React.FC = () => {
 		header: { text: '#FFFFFF', bg: '#004C99', lines: '#003366' },
 		row: { text: '#000', bg: '#D0E4FB', lines: '#A0C4FF' }
 	};
+
 	return (
 		<Box>
 			<Box border={1} borderColor={'#ccc'} borderRadius={2} p={1} display={'flex'} mb={1} justifyContent={'center'} gap={2}>
@@ -352,40 +351,14 @@ export function ModalRelacionarProduto({ row, allProducts }: IModalRelacionarPro
 			setLoading(false);
 		});
 	}, [selectedProd, reloadKey]);
-
-	// RELACIONAR EMBALAGENS / PRODUTOS -> PRODUTOS / EMBALAGENS
-	const [relacionarSelected, setRelacionarSelected] = useState<number[]>([]);
-	const submitRelacionar = async (modal_id: string) => {
-		if (relacionarSelected.length === 0) {
-			Swal.fire({
-				icon: 'warning',
-				title: 'Atenção',
-				text: 'Nenhum item selecionado para relacionar.',
-			});
-			return;
-		}
-		try {
-			const response = await PackService.putPacksInProd({
-				prod_id: selectedProd.id,
-				packs: relacionarSelected
-			});
-			if (response instanceof Error) {
-				throw response;
-			}
-			Swal.fire({
-				icon: 'success',
-				title: 'Sucesso',
-				text: 'Relação realizada com sucesso!',
-				willClose: () => {
-					modalCloseEvent.emit({ modalId: modal_id });
-					setReloadKey(old => old + 1);
-				}
-			});
-		} catch (error) {
-			alert(error);
-		}
-	};
-
+	const assignModalProps = useAssignModalProps(
+		{
+			mode: 'pack',
+			id: selectedProd.id,
+			label: selectedProd.label
+		},
+		() => setReloadKey(r => r + 1) // success callback
+	);
 	return (
 		<Box p={2}>
 			<CustomTextField label="Produto Fornecedor" value={row.name} disabled />
@@ -414,22 +387,7 @@ export function ModalRelacionarProduto({ row, allProducts }: IModalRelacionarPro
 							fullWidth
 							startIcon={<InventoryIcon />}
 							size="small"
-							modalProps={{
-								id: 'packs-to-relate-modal',
-								submit: () => submitRelacionar('packs-to-relate-modal'),
-								submitButtonProps: { Text: 'Relacionar' },
-								title: 'Relacionar Embalagens',
-								ModalContent: (
-									<ModalRelacionar
-										mode="pack"
-										id="packs-to-relate-modal"
-										apiCall={PackService.getAll}
-										itemSelectedName={selectedProd.label}
-										onChange={(selected) => setRelacionarSelected([...selected].map(([id, _]) => id))}
-										filterId={selectedProd.id}
-									/>
-								),
-							}}
+							modalProps={assignModalProps}
 						>
 							Relacionar Embalagens
 						</ModalButton>
