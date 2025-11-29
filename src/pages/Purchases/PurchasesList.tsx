@@ -29,7 +29,7 @@ import { listReloadEvent } from "../../shared/events/listEvents";
 import Swal from "sweetalert2";
 import { ViewModalContent } from "./Modals/ModalView";
 import { modalCloseEvent } from "../../shared/events/modalEvents";
-import { ModalXMLImport } from "./Modals/ModalXMLImport";
+import { ModalXMLImport } from "./Modals/XML/ModalXMLImport";
 
 
 export const PurchasesList: React.FC = () => {
