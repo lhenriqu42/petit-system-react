@@ -305,7 +305,7 @@ export const CreateModalContent: React.FC = () => {
 									data: {
 										mode: 'PACK',
 										quantity: 1,
-										price: nToBRL(0)
+										price: nToBRL(row.last_price_purchased)
 									}
 								};
 								return (

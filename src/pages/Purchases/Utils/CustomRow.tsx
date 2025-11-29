@@ -5,19 +5,17 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import Swal from "sweetalert2";
 import { memo, useEffect, useState } from "react";
-import { ModalRelacionar } from "../../packs/packs";
 import InventoryIcon from '@mui/icons-material/Inventory';
 import { PackService } from "../../../shared/services/api";
+import { ModalButton } from "../../../shared/components/ModalButton";
 import { BRLToN, nToBRL } from "../../../shared/services/formatters";
 import { ISelectedItem, ISelectedItemData } from "../Modals/ModalCreate";
-import { listReloadEvent } from "../../../shared/events/listEvents";
-import { ModalButton } from "../../../shared/components/ModalButton";
-import { modalCloseEvent } from "../../../shared/events/modalEvents";
 import { CustomSelect } from "../../../shared/forms/customInputs/CustomSelect";
 import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
 import { CustomButtonGroup } from "../../../shared/forms/customInputs/CustomButtonGroup";
+import { useAssignModalProps } from "../../packs/RelateModal";
+import { listReloadEvent } from "../../../shared/events/listEvents";
 
 interface CustomRowProps {
 	row: ISelectedItem;
@@ -55,42 +53,6 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 	}, []);
 
 
-
-
-	// RELACIONAR EMBALAGENS / PRODUTOS -> PRODUTOS / EMBALAGENS
-	const [relacionarSelected, setRelacionarSelected] = useState<number[]>([]);
-	const submitRelacionar = async (modal_id: string) => {
-		if (relacionarSelected.length === 0) {
-			Swal.fire({
-				icon: 'warning',
-				title: 'Atenção',
-				text: 'Nenhum item selecionado para relacionar.',
-			});
-			return;
-		}
-		try {
-			const response = await PackService.putPacksInProd({
-				prod_id: row.prod_id,
-				packs: relacionarSelected
-			});
-			if (response instanceof Error) {
-				throw response;
-			}
-			Swal.fire({
-				icon: 'success',
-				title: 'Sucesso',
-				text: 'Relação realizada com sucesso!',
-				willClose: () => {
-					modalCloseEvent.emit({ modalId: modal_id });
-					listReloadEvent.emit('array-selected-items');
-				}
-			});
-		} catch (error) {
-			alert(error);
-		}
-	};
-
-
 	// UTILS
 	const handleCashChange = (string: string) => {
 		const rawValue = string.replace(/[^0-9]/g, '');
@@ -98,6 +60,8 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 		const formattedValue = nToBRL(numericValue);
 		return (formattedValue);
 	};
+
+	const assignModalProps = useAssignModalProps({ mode: 'pack', id: row.prod_id, label: row.prod_name }, () => { listReloadEvent.emit('array-selected-items'); });
 	return (
 		<TableRow hover sx={{ cursor: 'default', height: 80 }}>
 			<TableCell width={200}>
@@ -141,21 +105,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 									<ModalButton
 										startIcon={<InventoryIcon />}
 										size="small"
-										modalProps={{
-											submit: () => submitRelacionar('packs-to-relate-modal'),
-											submitButtonProps: { Text: 'Relacionar' },
-											title: 'Relacionar Embalagens',
-											ModalContent: (
-												<ModalRelacionar
-													mode="pack"
-													id="packs-to-relate-modal"
-													apiCall={PackService.getAll}
-													itemSelectedName={row.prod_name}
-													onChange={(selected) => setRelacionarSelected([...selected].map(([id, _]) => id))}
-													filterId={row.prod_id}
-												/>
-											),
-										}}
+										modalProps={assignModalProps}
 									>
 										Relacionar Embalagens
 									</ModalButton>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Test Inventory XML
+  - Purpose: internal testing only (NOT a tax/invoice document)
+  - Contains fictional product entries with attributes useful for UI and import tests
+-->
+<TestInventory version="1.0" generatedAt="2025-11-26T12:00:00Z">
+  <Metadata>
+    <Environment>development</Environment>
+    <Source>internal-test-suite</Source>
+    <Description>Fictional inventory dataset for component and import testing</Description>
+  </Metadata>
+
+  <Items>
+    <Item id="1001" sku="TEST-1001">
+      <Name>Gelato - Vanilla</Name>
+      <Category>Desserts</Category>
+      <Quantity unit="unit">24</Quantity>
+      <Price currency="BRL">12.50</Price>
+      <Attributes>
+        <Attribute name="weight">0.2</Attribute>
+        <Attribute name="storage">frozen</Attribute>
+      </Attributes>
+    </Item>
+
+    <Item id="1002" sku="TEST-1002">
+      <Name>Chocolate Sprinkle</Name>
+      <Category>Toppings</Category>
+      <Quantity unit="kg">5.5</Quantity>
+      <Price currency="BRL">45.00</Price>
+      <Attributes>
+        <Attribute name="allergen">milk</Attribute>
+      </Attributes>
+    </Item>
+
+    <Item id="1003" sku="TEST-1003">
+      <Name>Reusable Scoop</Name>
+      <Category>Utensils</Category>
+      <Quantity unit="unit">10</Quantity>
+      <Price currency="BRL">9.99</Price>
+      <Attributes>
+        <Attribute name="material">stainless-steel</Attribute>
+        <Attribute name="color">silver</Attribute>
+      </Attributes>
+    </Item>
+
+    <Item id="1004" sku="TEST-1004">
+      <Name>Promotional Bundle</Name>
+      <Category>Bundles</Category>
+      <Quantity unit="bundle">2</Quantity>
+      <Price currency="BRL">79.90</Price>
+      <Attributes>
+        <Attribute name="bundle_count">6</Attribute>
+        <Attribute name="discount_pct">10</Attribute>
+      </Attributes>
+    </Item>
+  </Items>
+
+  <Notes>
+    <Note author="dev-team" date="2025-11-26">This file is synthetic and intended for internal dev/testing only.</Note>
+  </Notes>
+</TestInventory>

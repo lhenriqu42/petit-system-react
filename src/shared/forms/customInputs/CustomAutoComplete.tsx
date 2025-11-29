@@ -1,15 +1,18 @@
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete, TextField, AutocompleteProps } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+import { useDeepEffect } from "../../hooks";
 
-interface IAutoCompleteProps {
+type OrigProps = Omit<AutocompleteProps<{ id: number; label: string }, false, false, false>, 'options' | 'renderInput' | 'onChange' | 'value' | 'defaultValue'>;
+interface IAutoCompleteProps extends OrigProps {
 	options: { id: number; label: string }[];
 	label?: string;
 	size?: 'small' | 'medium';
 	minWidth?: number;
+	defaultValue?: number;
 	callback?: (selected: { id: number; label: string }) => void;
 }
 
-export const CustomAutoComplete: React.FC<IAutoCompleteProps> = ({ options, size = 'medium', label, minWidth, callback }) => {
+export const CustomAutoComplete: React.FC<IAutoCompleteProps> = ({ options, label, minWidth, defaultValue, callback, ...autoProps }) => {
 	const [selected, setSelected] = useState<{ id: number; label: string }>({ id: -1, label: '' });
 
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -33,12 +36,22 @@ export const CustomAutoComplete: React.FC<IAutoCompleteProps> = ({ options, size
 		callback?.(selected);
 	}, [selected]);
 
+	useDeepEffect(() => {
+		if (defaultValue !== undefined) {
+			const defaultOption = options.find(option => option.id === defaultValue);
+			if (defaultOption) {
+				setSelected(defaultOption);
+				return;
+			}
+		}
+		setSelected({ id: -1, label: '' });
+	}, [options, defaultValue]);
+
 	return (
 		<Autocomplete
 			onKeyDown={handleKeyDown}
 			id="combo-box"
 			onBlur={handleBlur}
-			size={size}
 			value={selected}
 			options={options}
 			sx={{ minWidth: minWidth }}
@@ -55,6 +68,7 @@ export const CustomAutoComplete: React.FC<IAutoCompleteProps> = ({ options, size
 					setSelected(newValue);
 				} else { setSelected({ id: -1, label: '' }); }
 			}}
+			{...autoProps}
 		/>
 	)
 }

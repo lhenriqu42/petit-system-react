@@ -12,17 +12,15 @@ import { LayoutMain } from "../../shared/layouts";
 import DeleteIcon from '@mui/icons-material/Delete';
 import CategoryIcon from '@mui/icons-material/Category';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ListArray } from "../../shared/components/ListArray";
+import { useEffect, useState } from "react";
 import { listReloadEvent } from "../../shared/events/listEvents";
 import { ModalButton } from "../../shared/components/ModalButton";
-import { modalCloseEvent } from "../../shared/events/modalEvents";
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import { GetAllFunction, ListItems } from "../../shared/components/ListItems";
+import { ListItems } from "../../shared/components/ListItems";
 import { IProduct, ProductService, PackService } from "../../shared/services/api";
-import { CustomTextField } from "../../shared/forms/customInputs/CustomTextField";
 import { CustomButtonGroup } from "../../shared/forms/customInputs/CustomButtonGroup";
 import { CreatePackModal } from "./CreateModal";
+import { useAssignModalProps } from "./RelateModal";
 
 
 
@@ -49,65 +47,6 @@ export const Packs: React.FC = () => {
 	useEffect(() => {
 		setProdSearch("");
 	}, [mode]);
-
-
-
-
-
-
-
-
-	// RELACIONAR EMBALAGENS / PRODUTOS -> PRODUTOS / EMBALAGENS
-	const [relacionarSelected, setRelacionarSelected] = useState<number[]>([]);
-	const submitRelacionar = async (modal_id: string) => {
-		if (relacionarSelected.length === 0) {
-			Swal.fire({
-				icon: 'warning',
-				title: 'Atenção',
-				text: 'Nenhum item selecionado para relacionar.',
-			});
-			return;
-		}
-		try {
-			let response: Promise<void | Error>;
-			if (mode === "Produtos" && prodSelected) {
-				response = PackService.putPacksInProd({
-					prod_id: prodSelected.id,
-					packs: relacionarSelected
-				});
-			} else if (mode === "Embalagens" && packSelected) {
-				response = PackService.putProdsInPack({
-					pack_id: packSelected.id,
-					prods: relacionarSelected
-				});
-			}
-			const result = await response!;
-			if (result instanceof Error) {
-				throw result;
-			}
-			listReloadEvent.emit(modal_id);
-			Swal.fire({
-				icon: 'success',
-				title: 'Sucesso',
-				text: 'Relação realizada com sucesso!',
-				willClose: () => {
-					modalCloseEvent.emit({ modalId: "*" });
-					listReloadEvent.emit('*');
-					setProdSearch("");
-				}
-			});
-		} catch (error) {
-			alert(error);
-		}
-	};
-
-
-
-
-
-
-
-
 
 
 
@@ -209,6 +148,19 @@ export const Packs: React.FC = () => {
 		}
 	};
 
+	const assignProdModalProps = useAssignModalProps(
+		{ id: prodSelected ? prodSelected.id : 0, label: prodSelected ? prodSelected.name : '', mode: 'pack' },
+		() => {
+			listReloadEvent.emit('*');
+			setProdSearch("");
+		}
+	);
+
+	const assignPackModalProps = useAssignModalProps(
+		{ id: packSelected ? packSelected.id : 0, label: packSelected ? packSelected.description : '', mode: 'prod' },
+		() => { listReloadEvent.emit('*'); }
+	);
+
 	return (
 		<>
 			<LayoutMain title="Embalagens" subTitle={"Cadastro de embalagens de produtos"}>
@@ -296,21 +248,7 @@ export const Packs: React.FC = () => {
 													onClose={() => {
 														listReloadEvent.emit('packs-to-relate-modal');
 													}}
-													modalProps={{
-														submit: () => submitRelacionar('packs-to-relate-modal'),
-														submitButtonProps: { Text: 'Relacionar' },
-														title: 'Relacionar Embalagens',
-														ModalContent: (
-															<ModalRelacionar
-																mode="pack"
-																id="packs-to-relate-modal"
-																apiCall={PackService.getAll}
-																itemSelectedName={prodSelected.name}
-																onChange={(selected) => setRelacionarSelected([...selected].map(([id, _]) => id))}
-																filterId={prodSelected.id}
-															/>
-														),
-													}}
+													modalProps={assignProdModalProps}
 												>
 													Relacionar Embalagens
 												</ModalButton>
@@ -359,21 +297,7 @@ export const Packs: React.FC = () => {
 													onClose={() => {
 														listReloadEvent.emit('prods-to-relate-modal');
 													}}
-													modalProps={{
-														submit: () => submitRelacionar('prods-to-relate-modal'),
-														submitButtonProps: { Text: 'Relacionar' },
-														title: 'Relacionar Produtos',
-														ModalContent: (
-															<ModalRelacionar
-																mode="prod"
-																id="prods-to-relate-modal"
-																apiCall={PackService.getAllProducts}
-																itemSelectedName={packSelected.description}
-																onChange={(selected) => setRelacionarSelected([...selected].map(([id, _]) => id))}
-																filterId={packSelected.id}
-															/>
-														),
-													}}
+													modalProps={assignPackModalProps}
 												>
 													Relacionar Produtos
 												</ModalButton>
@@ -419,122 +343,3 @@ export const Packs: React.FC = () => {
 		</>
 	);
 };
-
-
-
-interface ModalRelacionarProps<TData, TFilter = undefined> {
-	id?: string;
-	apiCall: GetAllFunction<TData, TFilter>;
-	filterId: number;
-	onChange?: (selected: Map<number, string>) => void;
-	itemSelectedName: string;
-	mode: 'prod' | 'pack';
-}
-export function ModalRelacionar<TData, TFilter = undefined>({ apiCall, itemSelectedName, onChange, filterId, id, mode }: ModalRelacionarProps<TData, TFilter>) {
-
-	const [selected, setSelected] = useState<Map<number, string>>(new Map());
-
-	const toggleSelect = ({ id, name }: { id: number, name: string }) => {
-		setSelected((prev) => {
-			const next = new Map(prev);
-			if (next.has(id)) next.delete(id);
-			else next.set(id, name);
-			return next;
-		});
-	};
-
-	useEffect(() => {
-		onChange?.(selected);
-	}, [selected]);
-
-	useEffect(() => {
-		const unsubscribe = listReloadEvent.on((target) => {
-			if (target == "*" || target == id) {
-				setSelected(new Map());
-			}
-		});
-		return unsubscribe; // remove listener ao desmontar
-	}, []);
-
-	const [search, setSearch] = useState("");
-	const inputRef = useRef<HTMLInputElement>(null);
-	useEffect(() => {
-		if (inputRef.current) {
-			inputRef.current.focus();
-		}
-	}, []);
-	const filters = useMemo(() => ({ id: filterId, prodName: search }), [filterId, search]);
-	return (
-		<Box display="flex" gap={2}>
-			<Box display="flex" flexDirection="column" gap={1} border={2} borderColor={'#555'} p={2} borderRadius={2} width={'50%'}>
-				<Box mb={1}>
-					<Typography variant="subtitle1">{mode === 'prod' ? 'Selecione os Produtos que deseja relacionar com a Embalagem:' : 'Selecione as Embalagens que deseja relacionar com o Produto:'}</Typography>
-					<Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
-						<Typography variant="h6" color="primary" fontWeight={650}>{itemSelectedName}</Typography>
-						<CreatePackModal />
-					</Box>
-				</Box>
-				<Box border={1} borderColor={'#ccc'} borderRadius={2} height={450} pb={3}>
-					{
-						mode === 'prod' &&
-						<Box p={1}>
-							<CustomTextField
-								inputRef={inputRef}
-								value={search}
-								onChange={(e) => setSearch(e.target.value)}
-								size="small"
-								label="Pesquisar Produtos"
-							/>
-						</Box>
-					}
-					<ListItems
-						itemsPerPage={mode === 'prod' ? 7 : 8}
-						height={mode === 'prod' ? 410 : 466}
-						id={id}
-						apiCall={apiCall}
-						filters={filters as any}
-						CustomTableRow={({ row }) => {
-							const { id, description, name } = row as any;
-							const item = { id, name: description ?? name };
-							return (
-								<TableRow hover sx={{ cursor: 'pointer' }} onClick={() => toggleSelect(item)} selected={selected.has(item.id)}>
-									<TableCell>{item.name}</TableCell>
-								</TableRow>
-							);
-						}}
-					/>
-				</Box>
-			</Box>
-			<Box display="flex" flexDirection="column" gap={1} border={2} borderColor={'#555'} p={2} borderRadius={2} width={'50%'}>
-
-				<Typography variant="subtitle1">{mode === 'prod' ? 'Produtos Selecionados:' : 'Embalagens Selecionadas:'}</Typography>
-				<Box border={1} borderColor={'#77f'} borderRadius={2} height={487} pb={3} sx={{ backgroundColor: '#fafafe' }}>
-					<ListArray
-						itemsPerPage={8}
-						customPlaceHolder="Nenhum item selecionado"
-						minHeight={467}
-						id={id}
-						items={[...selected.entries()].map(([id, name]) => ({ id, name }))}
-						CustomTableRow={({ row }) => {
-							return (
-								<TableRow hover sx={{ cursor: 'default' }}>
-									<TableCell>
-										{row.name.split(/(\d+)/).map((part, i) =>
-											/\d+/.test(part) ? (
-												<Typography component="span" key={i} color="secondary" fontWeight={700}>
-													{part}
-												</Typography>
-											) : (
-												<span key={i}>{part}</span>
-											)
-										)}
-									</TableCell>
-								</TableRow>
-							);
-						}}
-					/>
-				</Box>
-			</Box>
-		</Box>
-	);
-}

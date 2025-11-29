@@ -1,4 +1,4 @@
-type Listener<TArgs extends any[]> = (...args: TArgs) => void;
+type Listener<TArgs extends any[]> = (...args: TArgs) => any;
 
 export class EventEmitter<TArgs extends any[] = []> {
 	private listeners = new Set<Listener<TArgs>>();
@@ -9,8 +9,10 @@ export class EventEmitter<TArgs extends any[] = []> {
 	}
 
 	emit(...args: TArgs) {
+		const responses = [];
 		for (const listener of this.listeners) {
-			listener(...args);
+			responses.push(listener(...args));
 		}
+		return responses;
 	}
 }

@@ -149,7 +149,6 @@ export const ViewModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 														<TableRow key={row.id}>
 															<TableCell
 																sx={{
-																	borderRadius: '7px 0 0 0',
 																	backgroundColor: ProdPartColor.row.bg,
 																	color: ProdPartColor.row.text,
 																	borderBottomColor: ProdPartColor.row.lines
@@ -159,7 +158,6 @@ export const ViewModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 
 															<TableCell
 																sx={{
-																	borderRadius: '7px 0 0 0',
 																	backgroundColor: ProdPartColor.row.bg,
 																	color: ProdPartColor.row.text,
 																	borderBottomColor: ProdPartColor.row.lines

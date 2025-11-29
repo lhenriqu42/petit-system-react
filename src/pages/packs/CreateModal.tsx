@@ -12,7 +12,7 @@ import { PackService } from "../../shared/services/api";
 import { listReloadEvent } from "../../shared/events/listEvents";
 
 
-export const CreatePackModal = () => {
+export const CreatePackModal = ({ callback }: { callback?: () => void }) => {
 	const [createPackForm, setCreatePackForm] = useState<{ quantity: number }>({ quantity: 0 });
 	const [createAlert, setCreateAlert] = useState<{ message: string; color: 'error' | 'success' | 'info' | 'warning' } | null>(null);
 	const [createLoading, setCreateLoading] = useState(false);
@@ -34,6 +34,7 @@ export const CreatePackModal = () => {
 			return setCreateAlert({ message: 'Já existe uma embalagem com essa quantidade.', color: 'error' });
 		} finally {
 			setCreateLoading(false);
+			callback?.();
 		}
 	}
 	return (

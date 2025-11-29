@@ -29,6 +29,7 @@ import { listReloadEvent } from "../../shared/events/listEvents";
 import Swal from "sweetalert2";
 import { ViewModalContent } from "./Modals/ModalView";
 import { modalCloseEvent } from "../../shared/events/modalEvents";
+import { ModalXMLImport } from "./Modals/XML/ModalXMLImport";
 
 
 export const PurchasesList: React.FC = () => {
@@ -111,8 +112,7 @@ export const PurchasesList: React.FC = () => {
 							<AddIcon sx={{ mr: 1 }} /> Nova Compra
 						</ModalButton>
 						<Box display="flex" alignItems="center" gap={1}>
-							<Button
-								disabled
+							<ModalButton
 								variant="contained"
 								color="warning"
 								startIcon={<CodeIcon />}
@@ -120,9 +120,16 @@ export const PurchasesList: React.FC = () => {
 									backgroundColor: '#1d74f0',
 									'&:hover': { backgroundColor: '#0d64e0' },
 								}}
+								modalProps={{
+									title: 'Importar XML de Nota Fiscal',
+									id: 'purchase_import_xml_modal',
+									maxWidth: '75%',
+									submit: async () => { submitFormEvent.emit({ formId: 'submitPurchaseByXML' }) },
+									ModalContent: <ModalXMLImport modalId="purchase_import_xml_modal" />,
+								}}
 							>
 								Importar XML
-							</Button>
+							</ModalButton>
 							<Button
 								disabled
 								variant="contained"
@@ -173,7 +180,7 @@ export const PurchasesList: React.FC = () => {
 												size="medium"
 												backgroundColor={{ default: '#5bc0de', hover: '#6fd8ef' }}
 												modalProps={{
-													submit: async () => modalCloseEvent.emit({ modalId: 'purchase_view_modal' }),
+													submit: async () => { modalCloseEvent.emit({ modalId: 'purchase_view_modal' }) },
 													id: 'purchase_view_modal',
 													p: 0,
 													maxWidth: '70%',
