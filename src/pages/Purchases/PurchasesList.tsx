@@ -124,7 +124,8 @@ export const PurchasesList: React.FC = () => {
 									title: 'Importar XML de Nota Fiscal',
 									id: 'purchase_import_xml_modal',
 									maxWidth: '75%',
-									ModalContent: <ModalXMLImport />,
+									submit: async () => { submitFormEvent.emit({ formId: 'submitPurchaseByXML' }) },
+									ModalContent: <ModalXMLImport modalId="purchase_import_xml_modal" />,
 								}}
 							>
 								Importar XML
@@ -179,7 +180,7 @@ export const PurchasesList: React.FC = () => {
 												size="medium"
 												backgroundColor={{ default: '#5bc0de', hover: '#6fd8ef' }}
 												modalProps={{
-													submit: async () => modalCloseEvent.emit({ modalId: 'purchase_view_modal' }),
+													submit: async () => { modalCloseEvent.emit({ modalId: 'purchase_view_modal' }) },
 													id: 'purchase_view_modal',
 													p: 0,
 													maxWidth: '70%',

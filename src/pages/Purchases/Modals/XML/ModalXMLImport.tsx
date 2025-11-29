@@ -17,11 +17,15 @@ import { ListArray } from "../../../../shared/components/ListArray";
 import { submitFormEvent } from "../../../../shared/events/formEvents";
 import { ModalButton } from "../../../../shared/components/ModalButton";
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
-import { IGetMapResponse, INFEmitter, INFEmitterResponse, SupProdMapService } from "../../../../shared/services/api";
+import { IGetMapResponse, INFEmitter, INFEmitterResponse, IPurchaseCreateBody, PurchaseService, SupProdMapService } from "../../../../shared/services/api";
 import { ModalRelacionarEmissor } from "./ModalRelacionarEmissor";
 import { ModalRelacionarProduto } from "./ModalRelacionarProduto";
 import { Modal } from "../../../../shared/components";
 import { LinearProgressWithLabel } from "../../../../shared/components/LinearProgress";
+import { useDeepEffect } from "../../../../shared/hooks";
+import { modalCloseEvent } from "../../../../shared/events/modalEvents";
+import { listReloadEvent } from "../../../../shared/events/listEvents";
+
 const VisuallyHiddenInput = styled('input')({
 	clip: 'rect(0 0 0 0)',
 	clipPath: 'inset(50%)',
@@ -57,7 +61,7 @@ export interface ProductXML {
 }
 
 
-export const ModalXMLImport: React.FC = () => {
+export const ModalXMLImport: React.FC<{ modalId: string }> = ({ modalId }) => {
 	const [loading, setLoading] = useState(true);
 	const [emitter, setEmitter] = useState<INFEmitterResponse>();
 	const [emitterName, setEmitterName] = useState<string>('');
@@ -167,7 +171,7 @@ export const ModalXMLImport: React.FC = () => {
 					});
 				}
 				handleSync(products, emit)
-					.then(() => {setLoading(false)})
+					.then(() => { setLoading(false) })
 					.catch((error) => {
 						alert('Erro ao sincronizar dados: ' + error);
 						setLoading(false);
@@ -207,6 +211,8 @@ export const ModalXMLImport: React.FC = () => {
 		const created = await SupProdMapService.createNFEmitter(XMLEmitter);
 		return created;
 	}
+
+
 	const [progress, setProgress] = useState(0);
 	async function handleSync(products: ProductXML[], emitter: INFEmitter) {
 		const totalToProcess = products.length + 1; // +1 para o emissor
@@ -214,12 +220,97 @@ export const ModalXMLImport: React.FC = () => {
 		setProgress((prev) => prev + (1 / totalToProcess) * 100);
 		const productsSynced = await syncProducts(products, emitSynced, totalToProcess);
 		setEmitter(emitSynced);
-		if (productsSynced) setProducts(productsSynced);
+		setProducts(productsSynced ?? products);
 	}
+
+	/*	SwalErrorf printa um alerta de erro formatado.
+		ex: SwalErrorf('Erro ao processar o item %b com valor %s.', 'Item1', 100);
+		%b -> negrito
+		%s -> string normal                
+	*/
+	const SwalErrorf = (message: string, ...args: any[]) => {
+		let i = 0;
+		const formatted = message.replace(/%[sb]/g, (match) => {
+			const arg = args[i++] ?? '';
+			return match === '%b' ? `<b>${String(arg)}</b>` : String(arg);
+		});
+
+		Swal.fire({
+			icon: 'error',
+			title: 'Erro',
+			html: formatted,
+		});
+	};
+
+
+	async function submitPurchaseByXML() {
+		if (!emitter) {
+			SwalErrorf('Nenhum XML carregado.');
+			return;
+		}
+
+		if (!emitter?.supplier_id) {
+			SwalErrorf('Emissor do XML não está vinculado a nenhum fornecedor.');
+			return;
+		}
+
+		if (products.length === 0) {
+			SwalErrorf('Nenhum produto importado para criar a compra.');
+			return;
+		}
+
+		for (const item of products) {
+			if (!item.assign) {
+				SwalErrorf(`O produto %b não está relacionado a nenhum produto do sistema.`, item.name);
+				return;
+			}
+
+			if (item.quantity <= 0) {
+				SwalErrorf(`A quantidade do produto %b deve ser maior que 0.`, item.assign.prod_name || item.name);
+				return;
+			}
+		}
+
+		const body: IPurchaseCreateBody = {
+			supplier_id: emitter.supplier_id,
+			purchases: products.map(item => {
+				const mode = item.assign!.pack_id ? 'PACK' : 'PRODUCT';
+				return {
+					type: mode,
+					prod_id: item.assign!.prod_id,
+					pack_id: mode === 'PACK' ? item.assign!.pack_id ?? undefined : undefined,
+					quantity: item.quantity,
+					price: item.unit_price,
+				};
+			})
+		};
+		// console.log('Submitting purchase with body:', body);
+		const result = await PurchaseService.create(body);
+		if (result instanceof Error) {
+			SwalErrorf(result.message);
+		} else {
+			Swal.fire({
+				icon: 'success',
+				title: 'Sucesso',
+				text: 'Compra criada com sucesso.',
+				willClose: () => {
+					modalCloseEvent.emit({ modalId });
+					listReloadEvent.emit('purchase_list');
+				}
+			});
+
+		}
+	}
+	useDeepEffect(() => {
+		const unsubscribe = submitFormEvent.on(({ formId }) => formId === 'submitPurchaseByXML' && submitPurchaseByXML());
+		return unsubscribe;
+	}, [emitter, products]);
+
+
 
 	return (
 		<Box>
-			<Box border={1} borderColor={'#ccc'} borderRadius={2} p={1} display={'flex'} flexDirection={'column'} mb={1} justifyContent={'center'} alignItems={'center'} gap={2} px={5}>
+			<Box border={1} borderColor={'#ccc'} borderRadius={2} p={1} display={'flex'} flexDirection={'column'} alignItems={'center'} gap={2} px={5}>
 				<Box>
 					<Button
 						component="label"
@@ -237,6 +328,8 @@ export const ModalXMLImport: React.FC = () => {
 						/>
 					</Button>
 				</Box>
+			</Box>
+			<Box height={20} px={2}>
 				{
 					emitterName && loading &&
 					<LinearProgressWithLabel
@@ -245,7 +338,7 @@ export const ModalXMLImport: React.FC = () => {
 				}
 			</Box>
 			<Box border={2} p={1} borderColor={'#ccc'} borderRadius={2} gap={1} display={'flex'} flexDirection={'column'} height={670} alignItems={'center'}>
-				<Box display={'flex'} alignItems={'center'} gap={1}>
+				<Box display={'flex'} alignItems={'center'} gap={1} height={45}>
 					<Typography variant="h6" color={emitterName ? 'success' : 'error'}>{emitterName || 'Nenhum arquivo importado'}</Typography>
 					{
 						emitterName &&
@@ -270,9 +363,11 @@ export const ModalXMLImport: React.FC = () => {
 										maxWidth: 'sm',
 										submitButtonProps: { Text: 'Confirmar' },
 										submit: async () => {
-											const [id] = submitFormEvent.emit({ formId: 'submitAssign' });
+											const list = submitFormEvent.emit({ formId: 'submitAssign' });
+											const id = list[list.length - 1];
 											const promisse = id as Promise<number>;
-											promisse.then((res) => setEmitter((old) => old ? { ...old, supplier_id: res } : old));
+											const res = await promisse;
+											setEmitter((old) => old ? { ...old, supplier_id: res } : old)
 										},
 										id: 'relacionar-emissor',
 										ModalContent:
@@ -299,29 +394,29 @@ export const ModalXMLImport: React.FC = () => {
 						row: { text: '#000', bg: '#D0E4FB', lines: '#A0C4FF' }
 					};
 
-					function submitProdsAndUpdate(row_id: string) {
-						const [res] = submitFormEvent.emit({ formId: 'submitAssignProd' });
-						const promisse = res as Promise<IGetMapResponse | null>;
-						promisse.then((res) => {
-							if (!res) return;
-							setProducts((old) => {
-								return old.map((prod) => {
-									if (prod.id === row_id) {
-										return {
-											...prod,
-											assign: {
+					async function submitProdsAndUpdate(row_id: string) {
+						const list = submitFormEvent.emit({ formId: 'submitAssignProd' });
+						const ret = list[list.length - 1];
+						const promisse = ret as Promise<IGetMapResponse | null>;
+						const res = await promisse;
+						if (!res) return;
+						setProducts((old) => {
+							return old.map((prod) => {
+								if (prod.id === row_id) {
+									return {
+										...prod,
+										assign: {
 
-												prod_id: res.prod_id,
-												prod_name: res.prod_name,
-												pack_id: res.pack_id,
-												pack_qtt: res.pack_qtt,
-											}
-										};
-									}
-									return prod;
-								});
-							})
-						});
+											prod_id: res.prod_id,
+											prod_name: res.prod_name,
+											pack_id: res.pack_id,
+											pack_qtt: res.pack_qtt,
+										}
+									};
+								}
+								return prod;
+							});
+						})
 					}
 
 					return (
@@ -389,7 +484,7 @@ export const ModalXMLImport: React.FC = () => {
 									CustomTableRow={({ row }) => {
 										const [modalOpen, setModalOpen] = useState(false);
 										return (
-											<TableRow key={row.id}>
+											<TableRow key={row.id} sx={{ height: 63.55 }}>
 												<TableCell
 													sx={{
 														backgroundColor: XMLPartColor.row.bg,
@@ -433,7 +528,7 @@ export const ModalXMLImport: React.FC = () => {
 													id='relacionar-produto'
 													title='Relacionar Produto'
 													maxWidth='md'
-													submit={async () => { submitProdsAndUpdate(row.id) }}
+													submit={async () => { await submitProdsAndUpdate(row.id) }}
 													ModalContent={
 														row.assign && emitter?.supplier_id ? (
 															<ModalRelacionarProduto
@@ -491,7 +586,7 @@ export const ModalXMLImport: React.FC = () => {
 																				id: 'relacionar-produto',
 																				title: 'Relacionar Produto',
 																				maxWidth: 'md',
-																				submit: async () => submitProdsAndUpdate(row.id),
+																				submit: async () => await submitProdsAndUpdate(row.id),
 																				ModalContent:
 																					<ModalRelacionarProduto
 																						modalId="relacionar-produto"
