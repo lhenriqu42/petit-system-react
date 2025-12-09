@@ -22,8 +22,9 @@ interface IVSelectProps {
 	menuItens: IMenuItens[],
 	label?: string,
 	helperText?: string,
-	minWidth?: number,
-	maxWidth?: number,
+	width?: number | string,
+	minWidth?: number | string,
+	maxWidth?: number | string,
 	defaultSelected?: number,
 	onValueChange?: (selectedValue: string) => void;
 	m?: number,
@@ -39,7 +40,7 @@ interface IVSelectProps {
 	disabled?: boolean;
 }
 
-export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaultSelected, helperText, minWidth, onValueChange, m, mx, my, mt, p, px, py, maxWidth, size = 'medium', required, disabled }) => {
+export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaultSelected, helperText, minWidth, onValueChange, m, mx, my, mt, p, px, py, maxWidth, width, size = 'medium', required, disabled }) => {
 	const uniqueId = useId();
 	const [value, setValue] = useState('');
 	const [borderColor, setBorderColor] = useState<IBorderColor>();
@@ -68,7 +69,7 @@ export const CustomSelect: React.FC<IVSelectProps> = ({ menuItens, label, defaul
 	}, [value]);
 
 	return (
-		<Box sx={{ minWidth, m, mx, my, mt, p, px, py, maxWidth }}>
+		<Box sx={{ minWidth, m, mx, my, mt, p, px, py, maxWidth, width }}>
 			<FormControl fullWidth>
 				<InputLabel id={`${uniqueId}-label`} size={size == 'small' ? 'small' : 'normal'} color={borderColor && 'error'}>{label}</InputLabel>
 				<Select

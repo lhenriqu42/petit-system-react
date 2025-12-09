@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, ButtonProps } from "@mui/material";
+import { Box, Button, ButtonGroup, ButtonProps } from "@mui/material";
 import { useState } from "react";
 
 interface IButtonProps extends ButtonProps {
@@ -13,15 +13,17 @@ interface ICustomButtonGroupProps {
 	onChange?: (selected: { label: string, index: number } | null) => void;
 	buttons: IButtonProps[];
 	selected?: { label: string };
+	elevation?: number;
 }
 
 export const CustomButtonGroup: React.FC<ICustomButtonGroupProps> = ({
 	buttons,
 	width = 200,
 	size = "medium",
-	variant = "contained",
+	variant = "outlined",
 	onChange,
 	selected,
+	elevation = 2,
 }) => {
 	const item = selected ? { label: selected.label, index: buttons.findIndex(btn => btn.label === selected.label) } : null;
 	const [selectedButton, setSelectedButton] = useState<{ label: string, index: number } | null>(item || (buttons.length > 0 ? { label: buttons[0].label, index: 0 } : null));
@@ -31,12 +33,14 @@ export const CustomButtonGroup: React.FC<ICustomButtonGroupProps> = ({
 		onChange?.(selectedParam);
 	};
 	return (
-		<ButtonGroup variant={variant} aria-label="outlined button group" sx={{ width }} size={size}>
-			{buttons.map((button, index) => (
-				<Button {...button} size={size} key={button.label} sx={{ width: `${100 / buttons.length}%` }} onClick={() => handleChange({ label: button.label, index })} variant={selectedButton?.index === index ? 'contained' : 'outlined'}>
-					{button.label}
-				</Button>
-			))}
-		</ButtonGroup>
+		<Box width={width} borderRadius={2} boxShadow={elevation}>
+			<ButtonGroup variant={variant} aria-label="outlined button group" sx={{ width: '100.15%' }} size={size}>
+				{buttons.map((button, index) => (
+					<Button {...button} size={size} key={button.label} sx={{ width: `${100 / buttons.length}%` }} onClick={() => handleChange({ label: button.label, index })} variant={selectedButton?.index === index ? 'contained' : 'outlined'} >
+						{button.label}
+					</Button>
+				))}
+			</ButtonGroup>
+		</Box>
 	);
 };
