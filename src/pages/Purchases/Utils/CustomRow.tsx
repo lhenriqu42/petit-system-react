@@ -82,6 +82,7 @@ export const CustomRow = memo(function CustomRow({ row, mode, quantity, price, p
 					key={row.prod_id}
 					size="small"
 					variant="outlined"
+					elevation={0}
 					buttons={[{ label: 'Embalagem' }, { label: 'Unitario' }]}
 					selected={
 						mode === 'PACK'

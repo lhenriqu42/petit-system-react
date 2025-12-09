@@ -137,7 +137,7 @@ export const ModalXMLImport: React.FC<{ modalId: string }> = ({ modalId }) => {
 					const name = prod.querySelector("xProd")?.textContent ?? "";
 
 					const code_field = prod.querySelector("cEAN")?.textContent ?? undefined;
-					const code = code_field === "SEM GTIN" ? undefined : code_field;
+					const code =  code_field ?? "SEM GTIN";
 					const type = (prod.querySelector("uCom")?.textContent ?? "UN");
 					const quantity = parseInt(prod.querySelector("qCom")?.textContent ?? "0");
 					const unit_price = parseFloat(prod.querySelector("vUnCom")?.textContent ?? "0");
@@ -287,6 +287,11 @@ export const ModalXMLImport: React.FC<{ modalId: string }> = ({ modalId }) => {
 		// console.log('Submitting purchase with body:', body);
 		const result = await PurchaseService.create(body);
 		if (result instanceof Error) {
+
+			if (result.message === 'Request failed with status code 422') {
+				SwalErrorf('Dois ou mais produtos estão mapeados para a mesma combinação de produto/pacote. Verifique os mapeamentos e tente novamente.');
+				return;
+			}
 			SwalErrorf(result.message);
 		} else {
 			Swal.fire({
