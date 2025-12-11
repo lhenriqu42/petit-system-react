@@ -36,7 +36,7 @@ export function ModalRelacionarProduto({ modalId, supplier_id, row }: { modalId:
 		});
 	}, []);
 	const [selectedProd, setSelectedProd] = useState({ id: -1, label: "" });
-	const [selectedPack, setSelectedPack] = useState<{ id: number; label: string }>({ id: -1, label: '' });
+	const [selectedPack, setSelectedPack] = useState<{ id: number; label: string }>({ id: 0, label: 'Unitário' });
 	const [packs, setPacks] = useState<{ id: number; label: string }[]>([{ id: 0, label: 'Unitário' }]);
 	const [reloadKey, setReloadKey] = useState(0);
 	const [loading, setLoading] = useState(true);
@@ -119,7 +119,7 @@ export function ModalRelacionarProduto({ modalId, supplier_id, row }: { modalId:
 	}, [selectedProd, selectedPack]);
 
 	useEffect(() => {
-		setSelectedPack({ id: -1, label: '' });
+		setSelectedPack({ id: 0, label: 'Unitário' });
 	}, [reloadKey]);
 
 	return (
@@ -135,7 +135,7 @@ export function ModalRelacionarProduto({ modalId, supplier_id, row }: { modalId:
 					options={allProducts}
 					callback={(item) => {
 						setSelectedProd(item);
-						setSelectedPack({ id: -1, label: '' });
+						setSelectedPack({ id: 0, label: 'Unitário' });
 					}}
 				/>
 				{

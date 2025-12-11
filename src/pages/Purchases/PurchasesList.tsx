@@ -30,10 +30,12 @@ import Swal from "sweetalert2";
 import { ViewModalContent } from "./Modals/ModalView";
 import { modalCloseEvent } from "../../shared/events/modalEvents";
 import { ModalXMLImport } from "./Modals/XML/ModalXMLImport";
+import { useNavigate } from "react-router-dom";
+import { LoadingWrapper } from "../../shared/utils/LoadingWrapper";
 
 
 export const PurchasesList: React.FC = () => {
-
+	const navigate = useNavigate();
 	const completePurchase = (isEditing: boolean, purchaseId: number, supplier_name: string) => {
 		if (isEditing) {
 			Swal.fire({
@@ -49,20 +51,17 @@ export const PurchasesList: React.FC = () => {
 			confirmButtonColor: '#3085d6',
 		}).then((result) => {
 			if (result.isConfirmed) {
-				PurchaseService.completePurchase(purchaseId).then(() => {
-					// Swal.fire(
-					// 	'Concluído!',
-					// 	'O pedido foi concluído e os produtos foram adicionados ao estoque.',
-					// 	'success'
-					// );
-					listReloadEvent.emit('purchase_list', { page: 'current' });
-				}).catch(() => {
-					Swal.fire(
-						'Erro',
-						'Ocorreu um erro ao concluir o pedido. Por favor, tente novamente.',
-						'error'
-					);
-				});
+				const promise = PurchaseService.completePurchase(purchaseId)
+				new LoadingWrapper(promise)
+					.onSuccess(() => listReloadEvent.emit('purchase_list', { page: 'current' }))
+					.onError(() => {
+						Swal.fire(
+							'Erro',
+							'Ocorreu um erro ao concluir o pedido. Por favor, tente novamente.',
+							'error'
+						);
+					})
+					.fire('Concluindo pedido...')
 			}
 		});
 	}
@@ -76,19 +75,19 @@ export const PurchasesList: React.FC = () => {
 		});
 
 		if (result.isConfirmed) {
-			try {
-				await PurchaseService.cancelPurchase(purchaseId);
-				localStorage.removeItem(`purchase_edit_selected_${purchaseId}`);
-				localStorage.removeItem(`purchase_edit_sup_${purchaseId}`);
-				listReloadEvent.emit('purchase_list', { page: 'current' });
-			} catch {
-				Swal.fire(
-					'Erro',
-					'Ocorreu um erro ao cancelar o pedido. Por favor, tente novamente.',
-					'error'
-				);
-				return;
-			}
+			new LoadingWrapper(PurchaseService.cancelPurchase(purchaseId))
+				.onSuccess(() => {
+					localStorage.removeItem(`purchase_edit_selected_${purchaseId}`);
+					localStorage.removeItem(`purchase_edit_sup_${purchaseId}`);
+					listReloadEvent.emit('purchase_list', { page: 'current' });
+				})
+				.onError(() => {
+					Swal.fire(
+						'Erro',
+						'Ocorreu um erro ao cancelar o pedido. Por favor, tente novamente.',
+						'error'
+					);
+				}).fire('Cancelando pedido...');
 		}
 	}
 
@@ -131,9 +130,10 @@ export const PurchasesList: React.FC = () => {
 								Importar XML
 							</ModalButton>
 							<Button
-								disabled
+								color="warning"
 								variant="contained"
 								startIcon={<AssignmentIcon />}
+								onClick={() => { navigate('/relatorios') }}
 							>
 								Relatórios
 							</Button>

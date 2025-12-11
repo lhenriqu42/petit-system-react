@@ -21,6 +21,8 @@ export interface IProduct {
 	deleted_at?: Date,
 	stock?: number,
 	last_price_purchased?: number,
+	last_unit_cost?: number,
+	avg_cost?: number,
 
 }
 
@@ -223,7 +225,7 @@ const prodOutput = async (prod_output: Omit<IProdOutput, 'id' | 'created_at' | '
 		const { data } = await Api.post('/product/output', prod_output, Autorization());
 
 		if (data) {
-			return data.id;
+			return data.outputId;
 		}
 
 		return new Error('Erro ao criar o registro.');
