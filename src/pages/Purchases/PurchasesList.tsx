@@ -130,6 +130,7 @@ export const PurchasesList: React.FC = () => {
 								Importar XML
 							</ModalButton>
 							<Button
+								disabled
 								color="warning"
 								variant="contained"
 								startIcon={<AssignmentIcon />}
