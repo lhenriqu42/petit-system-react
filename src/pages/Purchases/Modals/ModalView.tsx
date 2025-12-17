@@ -4,15 +4,19 @@ import {
 	TableCell,
 	Typography,
 	CircularProgress,
+	Button,
 } from "@mui/material";
 import { nToBRL } from "../../../shared/services/formatters";
 import { ListArray } from "../../../shared/components/ListArray";
 import { useEffect, useState } from "react";
 import { IPurchaseDetails, PurchaseService } from "../../../shared/services/api/PurchaseService";
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
+import Swal from "sweetalert2";
+import { listReloadEvent } from "../../../shared/events/listEvents";
+import { modalCloseEvent } from "../../../shared/events/modalEvents";
 
-
+export const PROFIT_TARGET_MARGIN = 50;
 export const ViewModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId }) => {
-	const PROFIT_TARGET_MARGIN = 50;
 	const [data, setData] = useState<IPurchaseDetails>();
 
 	useEffect(() => {
@@ -27,6 +31,48 @@ export const ViewModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 
 		fetchData();
 	}, []);
+
+	const handleReorder = async () => {
+		if (!data) return;
+
+		const result = await Swal.fire({
+			title: 'Refazer pedido',
+			text: 'Tem certeza que deseja refazer este pedido?',
+			icon: 'question',
+			showCancelButton: true,
+			confirmButtonText: 'Sim, refazer',
+			cancelButtonText: 'Cancelar',
+		});
+		if (!result.isConfirmed) return;
+		Swal.fire({
+			title: 'Criando novo pedido...',
+			didOpen: async () => {
+				Swal.showLoading();
+				const reorderBody = {
+					supplier_id: data.supplier.id,
+					purchases: data.items_summary.items.map(item => {
+						return {
+							type: item.type,
+							prod_id: item.prod_id,
+							pack_id: item.type === 'PACK' ? item.pack_id! : undefined,
+							quantity: item.quantity,
+							price: item.price,
+						};
+					})
+				};
+				const response = await PurchaseService.create(reorderBody);
+				if (response instanceof Error) {
+					Swal.close();
+					return Swal.fire('Erro', `Não foi possível refazer o pedido: ${response.message}`, 'error');
+				}
+				Swal.close();
+				Swal.fire('Pedido criado!', 'O pedido foi criado com sucesso.', 'success');
+				listReloadEvent.emit('*');
+				modalCloseEvent.emit({ modalId: 'purchase_view_modal' });
+			},
+			allowOutsideClick: false,
+		});
+	}
 
 	return (
 		<Box>
@@ -68,7 +114,15 @@ export const ViewModalContent: React.FC<{ purchaseId: number }> = ({ purchaseId 
 							<Box display="flex" flexDirection="column" gap={0.5} border={2} borderColor={'#555'} px={2} py={0} borderRadius={2} width={'100%'}>
 								<Box display={'flex'} justifyContent={'space-between'} alignItems={'center'} mt={0.5} pr={3}>
 									<Typography variant="subtitle1" mt={0.5}>Itens do Pedido:</Typography>
-
+									<Button
+										startIcon={<ShoppingCartCheckoutIcon />}
+										variant="contained"
+										color="warning"
+										size="small"
+										onClick={handleReorder}
+									>
+										Refazer pedido
+									</Button>
 								</Box>
 								<Box border={1} borderColor={'#77f'} borderRadius={2} height={'100%'} pb={1} mb={1.5} sx={{ backgroundColor: '#fafafe' }}>
 									{(() => {

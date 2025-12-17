@@ -26,7 +26,7 @@ interface PaginationProps<TData> {
 	size?: "small" | "medium" | "large";
 	id?: string;
 	pagSx?: SxProps;
-
+	useAsKey?: keyof TData | ((item: TData, index: number) => string | number) | 'index';
 }
 
 export function ListArray<TData>({
@@ -40,7 +40,7 @@ export function ListArray<TData>({
 	height = '100%',
 	CustomTableRowHeader,
 	size = "medium",
-
+	useAsKey = (row: TData, index: number) => (row as any)?.id ?? (row as any)?.prod_id ?? index,
 
 }: PaginationProps<TData>) {
 	const theme = useTheme();
@@ -95,10 +95,7 @@ export function ListArray<TData>({
 
 						<TableBody key={reloadKey}>
 							{rows?.map((row, index) => {
-								const key =
-									(row as any)?.id ??
-									(row as any)?.prod_id ??
-									index; // fallback, mas evite depender do índice
+								const key = typeof useAsKey === 'function' ? useAsKey(row, index) : useAsKey === 'index' ? index : row[useAsKey] as string | number
 								return <CustomTableRow key={key} row={row} />;
 							})}
 						</TableBody>

@@ -25,6 +25,7 @@ export type GetAllFunction<TData, TFilter = undefined> = (
 ) => Promise<{ data: TData[]; totalCount: number } | Error>;
 
 interface PaginationProps<TData, TFilter = undefined> {
+	useAsKey?: keyof TData | ((item: TData, index: number) => string | number) | 'index';
 	apiCall: GetAllFunction<TData, TFilter>;
 	itemsPerPage?: number;
 	filters?: TFilter;
@@ -59,12 +60,10 @@ export function ListItems<TData, TFilter = undefined>({
 				</TableCell>
 			</TableRow>
 		);
-	}
-
-
+	},
+	useAsKey = (row: TData) => JSON.stringify(row)
 }: PaginationProps<TData, TFilter>) {
 	const NUMBER_OF_SKELETONS = Array(itemsPerPage).fill(null);
-
 	const theme = useTheme();
 	const smDown = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -123,8 +122,8 @@ export function ListItems<TData, TFilter = undefined>({
 						<TableBody>
 							{!loading ?
 								rows?.map(
-									(row) => (
-										<CustomTableRow key={JSON.stringify(row)} row={row} />
+									(row, index) => (
+										<CustomTableRow key={typeof useAsKey === 'function' ? useAsKey(row, index) : useAsKey === 'index' ? index : row[useAsKey] as string | number} row={row} />
 									)
 								)
 								:
