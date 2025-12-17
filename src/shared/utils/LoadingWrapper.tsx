@@ -41,7 +41,7 @@ export class LoadingWrapper {
 		try {
 			// 🔹 2. Executa tarefa principal
 			const result = await this.Task();
-
+			if (result instanceof Error) throw result;
 			// 🔹 3. Fecha modal de loading
 			Swal.close();
 

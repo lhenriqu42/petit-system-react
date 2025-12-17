@@ -1,0 +1,53 @@
+Relatorio Total:
+	- Desempenho Histórico
+		- Faturamento histórico
+			- Diario
+			- Semanal
+			- Mensal
+			- Anual
+			- Por Categoria
+			- Por Horario (descobrir horarios de pico)
+
+		- Quantidade de vendas
+			- Quantidade de produtos vendidos por dia/mês
+			- Ticket médio: TM = Faturamento / Nº de vendas
+
+		- Crescimento Histórico
+			- Crescimento mês a mês (%)
+			- Crescimento anual (%)
+			- Variação do ticket médio
+			- Comparação: este mês vs mês passado vs mesmo mês do ano anterior
+
+	- Desempenho Atual (KPIs do varejo)
+		- Margem bruta: MB = (Faturamento - Custo dos produtos vendidos) / Faturamento
+		- Margem líquida: ML = Lucro líquido / Faturamento
+		- Giro de estoque: GE = Custo dos produtos vendidos / Estoque médio
+		- Dias de estoque: DE = Estoque atual / (Venda media diaria / 365)
+
+	- Projeções Futuras
+		- Projeção de faturamento: Baseado na média móvel (últimos 7, 30 e 90 dias)
+		- Projeção de lucro: LP = Faturamento Projetado − Custos Fixos − CPV Projetado
+
+	- Projeção do estoque futuro
+		- Quantos dias até cada produto acabar: DE = Estoque atual / (Venda media diaria do produto)
+		- Quando deve ser feito o próximo pedido
+
+	- Relatório de Produtos
+		- Top 50 produtos mais vendidos
+			- Por quantidade
+			- Por faturamento
+			- Por margem de lucro
+
+		- Produtos com menor margem
+			- Identificar produtos com margens abaixo de um certo limiar (ex: 20%)
+		
+		- Produtos parados
+			- Produtos que não tiveram vendas nos últimos 30, 60, 90 dias: Dias parado= hoje − última venda
+
+	- Relatório de Estoque
+		- Valor total do estoque
+		- Curva ABC (A = mais importante, C = menos relevante)
+
+	- Indicadores de Eficiência do Negócio
+		- Custo das mercadorias vendidas (CMV / CPV): CPV = Estoque_Inicial + Compras − Estoque_Final
+		- Margem por categoria

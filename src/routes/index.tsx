@@ -5,7 +5,6 @@ import {
 	Groups,
 	Page404,
 	OutFlow,
-	AllSales,
 	Products,
 	Validity,
 	Payments,
@@ -29,6 +28,7 @@ import {
 import { Routes, Route } from 'react-router-dom';
 import { PurchasesList } from '../pages/Purchases/PurchasesList';
 import { Packs } from "../pages/packs/packs";
+// import { ReportPage } from '../pages/relatorios/ReportPage';
 
 export const AppRoutes = () => {
 	return (
@@ -49,7 +49,7 @@ export const AppRoutes = () => {
 			<Route path="/vendas" element={<ShowSales />} />
 			<Route path="/vendas/caixa/:id" element={<ShowSales />} />
 			<Route path="/vendas/:id" element={<SaleDetail />} />
-			<Route path="/vendas/admin" element={<AllSales />} />
+			{/* <Route path="/vendas/admin" element={<AllSales />} /> */}
 			<Route path="/caixa/dados/:id" element={<FincashResult />} />
 			<Route path="/caixa/editar/:id" element={<EditFincash />} />
 
@@ -89,6 +89,9 @@ export const AppRoutes = () => {
 			{/* Pedidos */}
 			<Route path="/pedidos" element={<PurchasesList />} />
 			
+			{/* Relatorios */}
+			{/* <Route path="/relatorios" element={<ReportPage />} /> */}
+
 
 			{/* Página 404 */}
 			<Route path='/*' element={<Page404 />} />
